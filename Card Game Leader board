@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Card Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --surface: #161b22;
+            --surface-hover: #21262d;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-muted: #8b949e;
+            
+            --green: #238636;
+            --red: #da3633;
+            --blue: #1f6feb;
+            --gold: #d29922;
+
+            --suit-black: #000000;
+            --suit-red: #d73a49;
+            
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-pill: 50px;
+            
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: var(--bg-color); color: var(--text); line-height: 1.5;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: max(60px, env(safe-area-inset-top)); 
+            padding-bottom: max(75px, calc(70px + env(safe-area-inset-bottom))); 
+            overflow-x: hidden;
+        }
+
+        button { font-family: inherit; border: none; background: none; cursor: pointer; color: inherit; transition: transform 0.1s, opacity 0.2s; }
+        button:active { transform: scale(0.95); }
+        button:disabled { opacity: 0.5; pointer-events: none; }
+        input, textarea { font-family: inherit; color: inherit; width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 1rem; }
+
+        h1, h2, h3 { font-weight: 700; color: #ffffff; }
+        .tiny { font-size: 0.75rem; color: var(--text-muted); }
+        .text-center { text-align: center; }
+
+        /* Fixed Top Header */
+        .app-header {
+            position: fixed; top: 0; left: 0; right: 0; height: max(50px, env(safe-area-inset-top));
+            background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding: 10px 15px; border-bottom: 1px solid var(--border); z-index: 50;
+        }
+        .app-header h1 { font-size: 1.1rem; margin: 0; padding-bottom: 2px; }
+        .app-header .credit { font-size: 0.65rem; color: var(--gold); font-weight: 800; text-transform: uppercase; padding-bottom: 4px; }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 10px; }
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .stack { display: flex; flex-direction: column; gap: 10px; }
+        
+        /* Native-style Slim Bottom Nav */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; 
+            background: rgba(22, 27, 34, 0.95); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; 
+            padding-top: 4px; padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 50; backdrop-filter: blur(10px);
+        }
+        .nav-btn { flex: 1; font-size: 0.65rem; font-weight: 700; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px; }
+        .nav-btn.active { color: var(--blue); }
+        .nav-icon { font-size: 1.2rem; }
+
+        .view-section { display: none; animation: fadeIn 0.3s; }
+        .view-section.active { display: block; }
+
+        .btn-primary { background: var(--blue); color: white; padding: 12px; font-weight: 700; border-radius: var(--radius-md); width: 100%; box-shadow: 0 4px 10px rgba(31, 111, 235, 0.3); }
+        .btn-green { background: var(--green); color: white; padding: 12px; font-weight: 700; border-radius: var(--radius-md); width: 100%; box-shadow: 0 4px 10px rgba(35, 134, 54, 0.3); }
+        .btn-danger { background: var(--red); color: white; padding: 8px 12px; font-weight: 600; border-radius: var(--radius-md); font-size: 0.85rem; }
+        .btn-ghost { background: var(--surface-hover); border: 1px solid var(--border); padding: 8px 12px; border-radius: var(--radius-md); font-size: 0.85rem; }
+
+        .pill-container { display: flex; flex-wrap: wrap; gap: 6px; }
+        .pill { background: var(--surface-hover); border: 1px solid var(--border); padding: 6px 12px; border-radius: var(--radius-pill); font-weight: 600; font-size: 0.85rem; }
+        .pill.active-trump { background: var(--blue); color: white; border-color: var(--blue); }
+
+        /* Compact Mobile Steppers (Kachuful) */
+        .stepper { display: flex; align-items: center; gap: 4px; }
+        .stepper button { width: 34px; height: 34px; border-radius: 6px; font-size: 1.2rem; font-weight: 800; color: white; display: flex; align-items: center; justify-content: center; }
+        .stepper .btn-minus { background: var(--red); }
+        .stepper .btn-plus { background: var(--green); }
+        .stepper input { text-align: center; font-weight: 800; font-size: 1.1rem; padding: 0; height: 34px; border: none; background: transparent; width: 36px; margin: 0; }
+
+        /* Fluid Single-Row Multi-Stepper for Kali Tiri */
+        .multi-stepper { 
+            display: flex; 
+            flex-wrap: nowrap; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: var(--bg-color); 
+            padding: 6px; 
+            border-radius: var(--radius-md); 
+            border: 1px solid var(--border); 
+            width: 100%;
+            gap: 4px;
+        }
+        .multi-stepper .btn-group { 
+            display: flex; 
+            flex: 1 1 0; 
+            gap: 3px; 
+        }
+        .multi-stepper .btn-group button { 
+            flex: 1; 
+            padding: 10px 0; 
+            font-weight: 700; 
+            border-radius: 6px; 
+            color: white; 
+            font-size: clamp(0.7rem, 2.5vw, 0.9rem); 
+            min-width: 0; 
+            text-align: center;
+        }
+        .multi-stepper .btn-group.red button { background: var(--red); }
+        .multi-stepper .btn-group.green button { background: var(--green); }
+        .multi-stepper input { 
+            flex: 0 0 45px; 
+            width: 45px;
+            text-align: center; 
+            font-size: clamp(1.1rem, 4vw, 1.4rem); 
+            font-weight: 800; 
+            border: none; 
+            background: transparent; 
+            margin: 0; 
+            padding: 0;
+            color: white;
+        }
+
+        /* Kachuful Player List */
+        .kf-player-list-wrapper { max-height: 45vh; overflow-y: auto; padding-right: 5px; }
+        .kf-player-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+        .kf-player-row:last-child { border-bottom: none; }
+        .kf-player-name { font-weight: 600; font-size: 0.95rem; width: 35%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .kf-pill-status { width: 85px; padding: 6px 0; text-align: center; border-radius: var(--radius-pill); font-weight: 700; font-size: 0.8rem; border: 2px solid transparent; }
+        .kf-pill-made { background: var(--green); color: white; }
+        .kf-pill-miss { background: transparent; border-color: var(--red); color: var(--red); }
+
+        .card-thumbnail { background: #ffffff; border-radius: 8px; width: 50px; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid #fff; }
+        .card-symbol { font-size: 2rem; line-height: 1; }
+        .card-count { font-size: 0.65rem; font-weight: 800; background: var(--surface); color: white; padding: 2px 4px; border-radius: 4px; margin-top: 2px; }
+
+        details.history-accordion { background: var(--bg-color); border: 1px solid var(--border); border-radius: var(--radius-md); }
+        details.history-accordion summary { padding: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        details.history-accordion summary::-webkit-details-marker { display: none; }
+        details.history-accordion[open] summary { border-bottom: 1px solid var(--border); }
+        .table-wrapper { overflow-x: auto; padding: 5px; max-height: 40vh; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.8rem; white-space: nowrap; }
+        th, td { padding: 6px; border: 1px solid var(--border); }
+        th { background: var(--surface-hover); color: var(--text-muted); position: sticky; top: 0; z-index: 10; }
+        .struck td { text-decoration: line-through; opacity: 0.4; }
+        .score-made { color: var(--green); font-weight: 700; }
+        .score-miss { color: var(--red); }
+
+        /* End Game Snapshot View */
+        .snapshot-card {
+            background: linear-gradient(145deg, var(--surface), var(--bg-color));
+            border: 2px solid var(--gold); border-radius: var(--radius-lg);
+            padding: 20px 15px; text-align: center; box-shadow: 0 10px 30px rgba(210, 153, 34, 0.2);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; overflow: hidden;
+        }
+        .snapshot-card::before { content: "🏆"; position: absolute; font-size: 150px; opacity: 0.05; top: -20px; right: -20px; pointer-events: none; }
+        .rank-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: var(--radius-md); margin-bottom: 6px; border: 1px solid var(--border); position: relative; z-index: 1; }
+        .rank-row.first { background: rgba(210, 153, 34, 0.15); border-color: var(--gold); }
+        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; padding: 15px; opacity: 0; }
+        .modal.active { display: flex; opacity: 1; }
+        .modal-content { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 15px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        /* ================= DESKTOP GRID LAYOUT ================= */
+        @media (min-width: 768px) {
+            .container { max-width: 1000px; padding: 20px; }
+            .desktop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+            .bottom-nav { display: none; }
+            body { padding-bottom: 20px; padding-top: 70px; }
+            
+            .app-header { justify-content: flex-start; gap: 20px; height: 60px; }
+            .app-header h1 { min-width: 200px; }
+            .desktop-nav { display: flex; gap: 10px; margin-left: auto; }
+            .desktop-nav button { color: var(--text-muted); font-weight: 600; padding: 8px 12px; border-radius: var(--radius-md); }
+            .desktop-nav button.active { background: var(--surface-hover); color: var(--blue); }
+            .desktop-nav button:hover { color: white; }
+        }
+        @media (max-width: 767px) {
+            .desktop-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="app-header">
+    <div>
+        <h1 id="top-title">Command Center</h1>
+        <div class="credit">Crafted by Chirag</div>
+    </div>
+    
+    <div class="desktop-nav">
+        <button id="dnav-setup" class="active" onclick="APP.switchTab('setup')">Setup</button>
+        <button id="dnav-kachuful" onclick="APP.switchTab('kachuful')">Kachuful</button>
+        <button id="dnav-kalitiri" onclick="APP.switchTab('kalitiri')">Kali Tiri</button>
+        <button id="dnav-rules" onclick="APP.switchTab('rules')">Rules</button>
+        <button id="dnav-endgame" style="color:var(--gold);" onclick="APP.showEndGame()">Finish</button>
+    </div>
+</header>
+
+<nav class="bottom-nav">
+    <button class="nav-btn active" onclick="APP.switchTab('setup')">
+        <span class="nav-icon">🏠</span><span>Setup</span>
+    </button>
+    <button class="nav-btn" onclick="APP.switchTab('kachuful')">
+        <span class="nav-icon">♠️</span><span>Kachuful</span>
+    </button>
+    <button class="nav-btn" onclick="APP.switchTab('kalitiri')">
+        <span class="nav-icon">🃏</span><span>Kali Tiri</span>
+    </button>
+    <button class="nav-btn" onclick="APP.switchTab('rules')">
+        <span class="nav-icon">📖</span><span>Rules</span>
+    </button>
+    <button class="nav-btn" onclick="APP.showEndGame()">
+        <span class="nav-icon" style="color: var(--gold);">🏆</span><span>Finish</span>
+    </button>
+</nav>
+
+<div class="container">
+
+    <!-- ================= SETUP ================= -->
+    <div id="view-setup" class="view-section active">
+        <div class="panel stack" style="max-width: 500px; margin: 0 auto;">
+            <h2 class="text-center">Start Session</h2>
+            <p class="tiny text-center">Add players by typing names separated by spaces or commas.</p>
+            
+            <textarea id="setup-input" rows="2" placeholder="e.g. Chirag Foram Ritu Nishit"></textarea>
+            
+            <div id="saved-players-container" style="display:none;">
+                <span class="tiny">Recent (Tap to add):</span>
+                <div id="saved-players-list" class="pill-container" style="margin-top:5px;"></div>
+            </div>
+
+            <div class="flex-between" style="background: var(--bg-color); padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-top:5px;">
+                <span class="tiny" style="font-size:0.8rem; font-weight:600; color:white;">Max Cards (Kachuful)</span>
+                <div class="stepper">
+                    <button class="btn-minus" onclick="document.getElementById('setup-maxcards').stepDown()">−</button>
+                    <input type="number" id="setup-maxcards" value="5" min="1" max="13" readonly>
+                    <button class="btn-plus" onclick="document.getElementById('setup-maxcards').stepUp()">+</button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-primary" onclick="APP.initGame('kachuful')">Start Kachuful</button>
+                <button class="btn-primary" style="background: var(--surface-hover); border: 1px solid var(--blue);" onclick="APP.initGame('kalitiri')">Start Kali Tiri</button>
+            </div>
+            
+            <button class="btn-danger" style="margin-top: 15px; padding:12px;" onclick="APP.eraseAll()">Erase All Data (PIN)</button>
+        </div>
+    </div>
+
+    <!-- ================= KACHUFUL ================= -->
+    <div id="view-kachuful" class="view-section">
+        <div id="kf-placeholder" class="panel text-center" style="max-width:500px; margin: 0 auto;">
+            <h3>No Active Game</h3>
+            <p class="tiny">Go to Setup to start Kachuful.</p>
+        </div>
+
+        <div id="kf-active-game" style="display: none;" class="desktop-grid">
+            <!-- Left Column: Controls -->
+            <div class="stack">
+                <div class="panel flex-between" style="margin-bottom: 0;">
+                    <div style="display:flex; align-items:center; gap: 12px;">
+                        <div id="kf-trump-card" class="card-thumbnail">
+                            <div id="kf-card-symbol" class="card-symbol" style="color: var(--suit-black);">♠</div>
+                            <div id="kf-card-count" class="card-count">5 Cards</div>
+                        </div>
+                        <div>
+                            <h2 id="kf-round-label" style="margin:0;">Round 1</h2>
+                            <span id="kf-phase-label" class="tiny" style="font-size: 0.8rem; color: #fff;">Agreed Bids Phase</span>
+                        </div>
+                    </div>
+                    <button class="btn-ghost" onclick="KF.resetRound()">Reset</button>
+                </div>
+
+                <div class="panel stack">
+                    <div class="kf-player-list-wrapper">
+                        <div id="kf-player-rows" class="stack" style="gap: 0;"></div>
+                    </div>
+                    
+                    <div style="margin-top: 5px; border-top: 1px solid var(--border); padding-top: 10px;">
+                        <div id="kf-warning-msg" style="color: var(--red); font-size: 0.8rem; font-weight: 700; text-align: center; display: none; margin-bottom: 8px;"></div>
+                        <button id="kf-action-btn" class="btn-primary" onclick="KF.handleAction()">Lock In Bids</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Stats -->
+            <div class="stack">
+                <div class="panel stack">
+                    <h3 style="font-size: 1rem;">Live Leaderboard</h3>
+                    <div id="kf-leaderboard" class="pill-container"></div>
+                </div>
+                
+                <div class="panel">
+                    <details class="history-accordion" id="kf-history-accordion" open>
+                        <summary>Game History Log <span>↓</span></summary>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead id="kf-history-head"></thead>
+                                <tbody id="kf-history-body"></tbody>
+                            </table>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= KALI TIRI ================= -->
+    <div id="view-kalitiri" class="view-section">
+        <div id="kt-placeholder" class="panel text-center" style="max-width:500px; margin: 0 auto;">
+            <h3>No Active Game</h3>
+            <p class="tiny">Go to Setup to start Kali Tiri.</p>
+        </div>
+
+        <div id="kt-active-game" style="display: none;" class="desktop-grid">
+            <!-- Left Column: Controls -->
+            <div class="panel stack">
+                <div class="flex-between">
+                    <h3>Team Selection</h3>
+                    <button class="btn-ghost" onclick="KT.resetRound()">Reset</button>
+                </div>
+                <span class="tiny">Tap player to assign to Trump Team (Blue)</span>
+                <div id="kt-team-board" class="pill-container" style="margin-top: 2px;"></div>
+                
+                <h3 style="margin-top: 10px;">Agreed Score</h3>
+                <div class="multi-stepper">
+                    <div class="btn-group red">
+                        <button onclick="KT.adjustScore(-20)">-20</button>
+                        <button onclick="KT.adjustScore(-10)">-10</button>
+                        <button onclick="KT.adjustScore(-5)">-5</button>
+                    </div>
+                    <input type="number" id="kt-score-input" value="250" readonly>
+                    <div class="btn-group green">
+                        <button onclick="KT.adjustScore(5)">+5</button>
+                        <button onclick="KT.adjustScore(10)">+10</button>
+                        <button onclick="KT.adjustScore(20)">+20</button>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 10px;">Select Winner</h3>
+                <div style="display: flex; gap: 10px;">
+                    <button id="kt-win-trump" class="btn-ghost" style="flex:1; padding:12px; font-weight:700;" onclick="KT.setWinner('trump')">Trump</button>
+                    <button id="kt-win-opp" class="btn-ghost" style="flex:1; padding:12px; font-weight:700;" onclick="KT.setWinner('opp')">Opp</button>
+                </div>
+
+                <button id="kt-record-btn" class="btn-green" style="margin-top: 15px;" onclick="KT.recordScore()">Record Score</button>
+            </div>
+
+            <!-- Right Column: Stats -->
+            <div class="stack">
+                <div class="panel stack">
+                    <h3 style="font-size: 1rem;">Leaderboard & Stats</h3>
+                    <div class="table-wrapper" style="max-height: 25vh;">
+                        <table>
+                            <thead><tr><th>Player</th><th>Score</th><th>Pl</th><th>Win %</th></tr></thead>
+                            <tbody id="kt-leaderboard"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <details class="history-accordion" id="kt-history-accordion" open>
+                        <summary>Game History Log <span>↓</span></summary>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead id="kt-history-head"></thead>
+                                <tbody id="kt-history-body"></tbody>
+                            </table>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RULES ================= -->
+    <div id="view-rules" class="view-section">
+        <div class="desktop-grid">
+            <div class="panel flex-between" style="grid-column: 1 / -1;">
+                <h2 style="margin:0; font-size:1.2rem;">Rules / નિયમો</h2>
+                <button class="btn-ghost" id="lang-toggle" onclick="I18N.toggle()">English</button>
+            </div>
+            
+            <div class="panel stack">
+                <h3 style="color: var(--gold); font-size:1.1rem;" id="rules-kf-title">કચુફુલ (Kachuful)</h3>
+                <p id="rules-kf-body" style="font-size: 0.85rem; color: var(--text-muted);"></p>
+            </div>
+
+            <div class="panel stack">
+                <h3 style="color: var(--blue); font-size:1.1rem;" id="rules-kt-title">કાળી તીરી (Kali Tiri)</h3>
+                <p id="rules-kt-body" style="font-size: 0.85rem; color: var(--text-muted);"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= END GAME SNAPSHOT ================= -->
+    <div id="view-endgame" class="view-section">
+        <div class="snapshot-card" id="snapshot-container" style="max-width:400px; margin:0 auto;">
+            <h2 style="margin-bottom: 5px; color: #fff;">🏆 Final Standings 🏆</h2>
+            <h4 id="endgame-title" style="color: var(--gold); margin-bottom: 20px; font-weight: 800; letter-spacing: 1px;"></h4>
+            
+            <div id="endgame-results" class="stack" style="gap: 6px;"></div>
+            
+            <p class="tiny text-center" style="margin-top:20px; font-weight: 600;">Take a screenshot to share!</p>
+            <button class="btn-ghost" style="width:100%; margin-top:10px; border-color: var(--gold); color: var(--gold);" onclick="APP.switchTab('setup')">Start New Session</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= EDIT MODAL ================= -->
+<div id="edit-modal" class="modal">
+    <div class="modal-content stack">
+        <h2 id="edit-modal-title" style="font-size: 1.1rem;">Edit Game Record</h2>
+        <div id="edit-modal-body" class="stack" style="margin: 5px 0;"></div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn-ghost" style="flex:1;" onclick="MODAL.close()">Cancel</button>
+            <button class="btn-primary" style="flex:1;" onclick="MODAL.saveEdit()">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const Utils = {
+        titleCase: str => str.trim().split(' ').map(w => w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : '').join(' '),
+        parseNames: str => str.split(/[\s,]+/).map(Utils.titleCase).filter(Boolean),
+        loadSavedPlayers: () => JSON.parse(localStorage.getItem('saved_players') || '[]'),
+        savePlayer: names => {
+            let saved = Utils.loadSavedPlayers();
+            // Store base names (no numbers) in recent history for cleanliness
+            let baseNames = names.map(n => n.replace(/\s\d+$/, ''));
+            baseNames.forEach(n => { if(!saved.includes(n)) saved.push(n); });
+            localStorage.setItem('saved_players', JSON.stringify(saved));
+        }
+    };
+
+    const I18N = {
+        lang: 'gu',
+        data: {
+            gu: {
+                kfTitle: "કચુફુલ (Kachuful)",
+                kfBody: "દરેક રાઉન્ડમાં ચોક્કસ ટ્રમ્પ (કાળી, લાલ, ફુલ્લી, ચરકટ) હોય છે. તમારે બરાબર કેટલી થપ્પી (tricks) જીતશો તે નક્કી કરવાનું રહેશે. ખેલાડીઓની કુલ બિડ રાઉન્ડના કુલ પત્તા જેટલી ન હોવી જોઈએ (અવિરત રમત માટે નિયંત્રણ). સ્કોરિંગ: 0 ની બિડ માટે 10 પોઈન્ટ્સ, અથવા બિડ ગુણ્યા 11 (જેમ કે 1=11, 2=22). જો તમે તમારી બિડ મુજબ ન જીતો તો 0 સ્કોર મળશે.",
+                ktTitle: "કાળી તીરી (Kali Tiri)",
+                ktBody: "ટ્રમ્પ ટીમ (ભૂરો રંગ) પસંદ કરો. રમતમાં નક્કી કરેલ સ્કોર ઉમેરો. જો ટ્રમ્પ ટીમ જીતે, તો તેમને નક્કી કરેલ સ્કોર મળશે. જો વિરોધી ટીમ જીતે, તો તેમને બમણો (double) સ્કોર મળશે."
+            },
+            en: {
+                kfTitle: "Kachuful",
+                kfBody: "Each round features a trump suit (Spades, Diamonds, Clubs, Hearts). You must bid the exact number of tricks you intend to win. The sum of all bids cannot equal the total cards dealt. Scoring: 10 points for a 0 bid, or 11 times the bid amount (1=11, 2=22). Missing the exact bid results in 0 points.",
+                ktTitle: "Kali Tiri",
+                ktBody: "Select the Trump team (Blue). Set the agreed score. If the Trump team wins, they receive the agreed score. If the Opposition wins, they receive double the agreed score."
+            }
+        },
+        toggle: () => {
+            I18N.lang = I18N.lang === 'gu' ? 'en' : 'gu';
+            document.getElementById('lang-toggle').innerText = I18N.lang === 'gu' ? 'English' : 'ગુજરાતી';
+            I18N.render();
+        },
+        render: () => {
+            const d = I18N.data[I18N.lang];
+            document.getElementById('rules-kf-title').innerText = d.kfTitle;
+            document.getElementById('rules-kf-body').innerText = d.kfBody;
+            document.getElementById('rules-kt-title').innerText = d.ktTitle;
+            document.getElementById('rules-kt-body').innerText = d.ktBody;
+        }
+    };
+
+    const APP = {
+        currentModule: null,
+        switchTab: (tab) => {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn, .desktop-nav button').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${tab}`).classList.add('active');
+            
+            // Sync mobile and desktop navs
+            document.querySelectorAll(`.nav-btn:nth-child(${tab==='setup'?1:tab==='kachuful'?2:tab==='kalitiri'?3:tab==='rules'?4:5})`).forEach(el => el.classList.add('active'));
+            document.querySelectorAll(`#dnav-${tab}`).forEach(el => el.classList.add('active'));
+            
+            if(tab === 'setup') APP.renderSavedPlayers();
+            
+            let title = "Command Center";
+            if(tab === 'kachuful') title = "Kachuful";
+            if(tab === 'kalitiri') title = "Kali Tiri";
+            if(tab === 'endgame') title = "Results";
+            document.getElementById('top-title').innerText = title;
+        },
+        renderSavedPlayers: () => {
+            const saved = Utils.loadSavedPlayers();
+            const container = document.getElementById('saved-players-container');
+            const list = document.getElementById('saved-players-list');
+            if(saved.length > 0) {
+                container.style.display = 'block';
+                list.innerHTML = saved.map(p => `<button class="pill" onclick="APP.appendPlayer('${p}')">+ ${p}</button>`).join('');
+            }
+        },
+        appendPlayer: (name) => {
+            const input = document.getElementById('setup-input');
+            input.value = input.value ? input.value + ' ' + name : name;
+        },
+        initGame: (type) => {
+            let names = Utils.parseNames(document.getElementById('setup-input').value);
+            
+            // --- DUPLICATE CHECK LOGIC ---
+            let counts = {};
+            let duplicates = [];
+            names.forEach(n => {
+                counts[n] = (counts[n] || 0) + 1;
+                if (counts[n] === 2) duplicates.push(n);
+            });
+
+            if (duplicates.length > 0) {
+                let keep = confirm(`Duplicate name(s) found: ${duplicates.join(', ')}.\n\nDo you want to keep them?\n(OK = Keep and add numbers, Cancel = Remove duplicates)`);
+                let finalNames = [];
+                if (keep) {
+                    let seen = {};
+                    names.forEach(n => {
+                        if (seen[n]) {
+                            seen[n]++;
+                            finalNames.push(`${n} ${seen[n]}`);
+                        } else {
+                            seen[n] = 1;
+                            finalNames.push(n);
+                        }
+                    });
+                } else {
+                    finalNames = [...new Set(names)];
+                }
+                names = finalNames;
+            }
+
+            if(names.length < 2) return alert("Enter at least 2 players.");
+            
+            Utils.savePlayer(names);
+            APP.currentModule = type;
+            
+            if(type === 'kachuful') KF.start(names);
+            else KT.start(names);
+            
+            APP.switchTab(type);
+        },
+        showEndGame: () => {
+            if(!APP.currentModule) return alert("No active game to finish.");
+            
+            let html = '';
+            if(APP.currentModule === 'kachuful') {
+                document.getElementById('endgame-title').innerText = "KACHUFUL MATCH";
+                const sorted = [...KF.state.players].sort((a,b)=>b.score-a.score);
+                sorted.forEach((p, i) => {
+                    let medal = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':`#${i+1}`));
+                    html += `<div class="rank-row ${i===0?'first':''}">
+                        <div style="font-weight:800; font-size:1rem;">${medal} ${p.name}</div>
+                        <div style="font-weight:800; font-size:1.1rem; color:var(--gold);">${p.score}</div>
+                    </div>`;
+                });
+            } else {
+                document.getElementById('endgame-title').innerText = "KALI TIRI MATCH";
+                let s={}; KT.state.players.forEach(p=>s[p]=0);
+                KT.state.history.filter(x=>x.status==='active').forEach(r => {
+                    r.t.forEach(p => { if(r.w==='trump') s[p]+=r.s; });
+                    r.o.forEach(p => { if(r.w==='opp') s[p]+=(r.s*2); });
+                });
+                const sorted = [...KT.state.players].sort((a,b)=>s[b]-s[a]);
+                sorted.forEach((p, i) => {
+                    let medal = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':`#${i+1}`));
+                    html += `<div class="rank-row ${i===0?'first':''}">
+                        <div style="font-weight:800; font-size:1rem;">${medal} ${p}</div>
+                        <div style="font-weight:800; font-size:1.1rem; color:var(--gold);">${s[p]}</div>
+                    </div>`;
+                });
+            }
+            
+            document.getElementById('endgame-results').innerHTML = html;
+            APP.switchTab('endgame');
+        },
+        eraseAll: () => {
+            const pin = prompt("Enter PIN to wipe all data:");
+            if(pin === "1111") { localStorage.clear(); location.reload(); }
+            else if(pin) alert("Incorrect PIN");
+        }
+    };
+
+    const MODAL = {
+        type: null, editIndex: null, state: {},
+        open: (type, index) => {
+            MODAL.type = type; MODAL.editIndex = index;
+            const el = document.getElementById('edit-modal');
+            el.classList.add('active');
+            
+            if(type === 'kf') {
+                const rec = KF.state.history[index];
+                MODAL.state = { bids: [], misses: [] };
+                KF.state.original.forEach((n, i) => {
+                    const d = rec.data[n] || {b:0, made:true};
+                    MODAL.state.bids[i] = d.b; MODAL.state.misses[i] = !d.made;
+                });
+                MODAL.renderKFEdit(rec.round);
+            } else {
+                const rec = KT.state.history[index];
+                MODAL.state = { trump: [...rec.t], opp: [...rec.o], score: rec.s, win: rec.w };
+                MODAL.renderKTEdit();
+            }
+        },
+        close: () => { document.getElementById('edit-modal').classList.remove('active'); },
+        
+        renderKFEdit: (round) => {
+            const max = KF.calcCards(round);
+            let html = '';
+            KF.state.original.forEach((n, i) => {
+                const statusStr = MODAL.state.misses[i] ? 'Missed' : 'Made';
+                const statusCls = MODAL.state.misses[i] ? 'kf-pill-miss' : 'kf-pill-made';
+                html += `
+                <div class="kf-player-row">
+                    <div style="font-weight:600; width:28%; overflow:hidden; text-overflow:ellipsis; font-size:0.85rem;">${n}</div>
+                    <div class="stepper">
+                        <button class="btn-minus" onclick="MODAL.adjKFBid(${i}, -1, ${max})">−</button>
+                        <input readonly value="${MODAL.state.bids[i]}">
+                        <button class="btn-plus" onclick="MODAL.adjKFBid(${i}, 1, ${max})">+</button>
+                    </div>
+                    <button class="kf-pill-status ${statusCls}" style="width:75px; font-size:0.75rem;" onclick="MODAL.togKFMiss(${i})">${statusStr}</button>
+                </div>`;
+            });
+            document.getElementById('edit-modal-body').innerHTML = html;
+        },
+        adjKFBid: (i, d, max) => { MODAL.state.bids[i] = Math.max(0, Math.min(max, MODAL.state.bids[i] + d)); MODAL.renderKFEdit(KF.state.history[MODAL.editIndex].round); },
+        togKFMiss: (i) => { MODAL.state.misses[i] = !MODAL.state.misses[i]; MODAL.renderKFEdit(KF.state.history[MODAL.editIndex].round); },
+        
+        renderKTEdit: () => {
+            let html = `<div class="pill-container">`;
+            KT.state.players.forEach(p => {
+                const cls = MODAL.state.trump.includes(p) ? 'pill active-trump' : 'pill';
+                html += `<button class="${cls}" onclick="MODAL.togKTTeam('${p}')">${p}</button>`;
+            });
+            html += `</div>
+            <div class="multi-stepper" style="margin-top:10px;">
+                <div class="btn-group red">
+                    <button onclick="MODAL.adjKTScore(-20)">-20</button>
+                    <button onclick="MODAL.adjKTScore(-10)">-10</button>
+                    <button onclick="MODAL.adjKTScore(-5)">-5</button>
+                </div>
+                <input value="${MODAL.state.score}" readonly>
+                <div class="btn-group green">
+                    <button onclick="MODAL.adjKTScore(5)">+5</button>
+                    <button onclick="MODAL.adjKTScore(10)">+10</button>
+                    <button onclick="MODAL.adjKTScore(20)">+20</button>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn-ghost ${MODAL.state.win==='trump'?'active-trump':''}" style="flex:1; padding:10px; ${MODAL.state.win==='trump'?'background:var(--blue); color:white;':''}" onclick="MODAL.setKTWin('trump')">Trump</button>
+                <button class="btn-ghost ${MODAL.state.win==='opp'?'active-trump':''}" style="flex:1; padding:10px; ${MODAL.state.win==='opp'?'background:var(--red); color:white;':''}" onclick="MODAL.setKTWin('opp')">Opp</button>
+            </div>`;
+            document.getElementById('edit-modal-body').innerHTML = html;
+        },
+        togKTTeam: (p) => {
+            if(MODAL.state.trump.includes(p)) { MODAL.state.trump = MODAL.state.trump.filter(x=>x!==p); MODAL.state.opp.push(p); }
+            else { MODAL.state.trump.push(p); MODAL.state.opp = MODAL.state.opp.filter(x=>x!==p); }
+            MODAL.renderKTEdit();
+        },
+        adjKTScore: (d) => { MODAL.state.score = Math.max(1, MODAL.state.score + d); MODAL.renderKTEdit(); },
+        setKTWin: (w) => { MODAL.state.win = w; MODAL.renderKTEdit(); },
+
+        saveEdit: () => {
+            if(MODAL.type === 'kf') {
+                const old = KF.state.history[MODAL.editIndex];
+                KF.state.original.forEach(n => { if(old.data[n]) { let p = KF.state.players.find(x=>x.name===n); if(p) p.score -= old.data[n].pts; }});
+                old.status = 'edited';
+                let rec = { id: Date.now(), round: old.round, status: 'active', data: {} };
+                KF.state.original.forEach((n, i) => {
+                    const b = MODAL.state.bids[i], made = !MODAL.state.misses[i], pts = made ? (b === 0 ? 10 : b * 11) : 0;
+                    let p = KF.state.players.find(x=>x.name===n); if(p) p.score += pts;
+                    rec.data[n] = { b, made, pts };
+                });
+                KF.state.history.splice(MODAL.editIndex + 1, 0, rec);
+                KF.render();
+            } else {
+                const old = KT.state.history[MODAL.editIndex];
+                old.status = 'edited';
+                KT.state.history.splice(MODAL.editIndex + 1, 0, {
+                    t: [...MODAL.state.trump], o: [...MODAL.state.opp], s: MODAL.state.score, w: MODAL.state.win, status: 'active'
+                });
+                KT.render();
+            }
+            MODAL.close();
+        }
+    };
+
+    const KF = {
+        state: { players: [], original: [], max: 5, round: 1, bids: [], misses: [], phase: 'bid', history: [], suits: [{s:'♠',c:'var(--suit-black)'},{s:'♦',c:'var(--suit-red)'},{s:'♣',c:'var(--suit-black)'},{s:'♥',c:'var(--suit-red)'}] },
+        
+        start: (names) => {
+            KF.state.players = names.map(n => ({name: n, score: 0}));
+            KF.state.original = [...names];
+            KF.state.max = parseInt(document.getElementById('setup-maxcards').value) || 5;
+            KF.state.round = 1; KF.state.history = [];
+            document.getElementById('kf-placeholder').style.display = 'none';
+            document.getElementById('kf-active-game').classList.add('desktop-grid');
+            document.getElementById('kf-active-game').style.display = window.innerWidth >= 768 ? 'grid' : 'block';
+            KF.initRound();
+        },
+        calcCards: (r) => r <= KF.state.max ? r : KF.state.max - (r - KF.state.max),
+        initRound: () => {
+            KF.state.phase = 'bid';
+            KF.state.bids = new Array(KF.state.players.length).fill(0);
+            KF.state.misses = new Array(KF.state.players.length).fill(false);
+            KF.render();
+        },
+        adjBid: (i, d) => {
+            if(KF.state.phase !== 'bid') return;
+            KF.state.bids[i] = Math.max(0, Math.min(KF.calcCards(KF.state.round), KF.state.bids[i] + d));
+            KF.render();
+        },
+        togMiss: (i) => { if(KF.state.phase === 'score') { KF.state.misses[i] = !KF.state.misses[i]; KF.render(); } },
+        resetRound: () => { KF.state.phase = 'bid'; KF.state.misses.fill(false); KF.render(); },
+        handleAction: () => {
+            if(KF.state.phase === 'bid') { KF.state.phase = 'score'; KF.render(); }
+            else {
+                let rec = { id: Date.now(), round: KF.state.round, status: 'active', data: {} };
+                KF.state.players.forEach((p, i) => {
+                    const b = KF.state.bids[i], made = !KF.state.misses[i], pts = made ? (b === 0 ? 10 : b * 11) : 0;
+                    p.score += pts; rec.data[p.name] = { b, made, pts };
+                });
+                KF.state.history.push(rec);
+                KF.state.players.push(KF.state.players.shift());
+                KF.state.round++;
+                KF.initRound();
+            }
+        },
+        delGame: (idx) => {
+            if(confirm("Void this round?")) {
+                let rec = KF.state.history[idx];
+                KF.state.original.forEach(n => { let p = KF.state.players.find(x=>x.name===n); if(p && rec.data[n]) p.score -= rec.data[n].pts; });
+                rec.status = 'deleted'; KF.render();
+            }
+        },
+        render: () => {
+            const cards = KF.calcCards(KF.state.round);
+            const trump = KF.state.suits[(KF.state.round - 1) % 4];
+            
+            document.getElementById('kf-round-label').innerText = `Round ${KF.state.round}`;
+            document.getElementById('kf-card-symbol').innerText = trump.s;
+            document.getElementById('kf-card-symbol').style.color = trump.c;
+            document.getElementById('kf-card-count').innerText = `${cards} Card${cards>1?'s':''}`;
+            document.getElementById('kf-phase-label').innerText = KF.state.phase === 'bid' ? 'Enter Agreed Bids' : 'Tap pills if missed';
+
+            const pRows = document.getElementById('kf-player-rows');
+            pRows.innerHTML = '';
+            
+            let currTot = KF.state.bids.slice(0, -1).reduce((a,b)=>a+b, 0);
+            let restricted = cards - currTot;
+            let lastIdx = KF.state.players.length - 1;
+            let btn = document.getElementById('kf-action-btn');
+            let warn = document.getElementById('kf-warning-msg');
+
+            if (KF.state.phase === 'bid' && restricted >= 0 && restricted <= cards) {
+                warn.innerText = `${KF.state.players[lastIdx].name} CANNOT bid ${restricted}`;
+                warn.style.display = 'block';
+                if (KF.state.bids[lastIdx] === restricted) { btn.disabled = true; btn.innerText = "Invalid Bid"; btn.className = "btn-danger"; }
+                else { btn.disabled = false; btn.innerText = "Lock In Bids"; btn.className = "btn-primary"; }
+            } else {
+                warn.style.display = 'none'; btn.disabled = false;
+                if(KF.state.phase === 'bid') { btn.innerText = "Lock In Bids"; btn.className = "btn-primary"; }
+                else { btn.innerText = "Record Scores"; btn.className = "btn-green"; }
+            }
+
+            KF.state.players.forEach((p, i) => {
+                const ctrl = KF.state.phase === 'bid'
+                    ? `<div class="stepper"><button class="btn-minus" onclick="KF.adjBid(${i},-1)">−</button><input readonly value="${KF.state.bids[i]}"><button class="btn-plus" onclick="KF.adjBid(${i},1)">+</button></div>`
+                    : `<button class="kf-pill-status ${KF.state.misses[i]?'kf-pill-miss':'kf-pill-made'}" onclick="KF.togMiss(${i})">${KF.state.misses[i]?'Missed':'Made'} ${KF.state.bids[i]}</button>`;
+                pRows.innerHTML += `<div class="kf-player-row"><div class="kf-player-name">${p.name}</div>${ctrl}</div>`;
+            });
+
+            const lb = document.getElementById('kf-leaderboard');
+            lb.innerHTML = [...KF.state.players].sort((a,b)=>b.score-a.score).map((p,i) => `<div class="pill"><span style="color:var(--gold); margin-right:4px;">#${i+1}</span> ${p.name}: <strong>${p.score}</strong></div>`).join('');
+
+            const hHead = document.getElementById('kf-history-head');
+            hHead.innerHTML = `<tr><th>R</th>${KF.state.original.map(n=>`<th>${n.substring(0,3)}</th>`).join('')}<th>Act</th></tr>`;
+            
+            const hBody = document.getElementById('kf-history-body');
+            hBody.innerHTML = '';
+            [...KF.state.history].reverse().forEach((g, idx) => {
+                const rIdx = KF.state.history.length - 1 - idx;
+                let tr = `<tr class="${g.status==='deleted'?'struck':''}"><td>${g.round}</td>`;
+                KF.state.original.forEach(n => {
+                    let d = g.data[n];
+                    tr += d ? `<td class="${d.made?'score-made':'score-miss'}">${d.b}${d.made?'✓':'✗'}<br><span class="tiny" style="color:var(--text-muted);">+${d.pts}</span></td>` : `<td>-</td>`;
+                });
+                tr += `<td>${g.status==='active' ? `<button class="btn-ghost" style="color:var(--gold); margin-bottom:4px; padding:2px 6px;" onclick="MODAL.open('kf', ${rIdx})">✎</button><br><button class="btn-danger" style="padding:2px 6px;" onclick="KF.delGame(${rIdx})">X</button>` : '-'}</td></tr>`;
+                hBody.innerHTML += tr;
+            });
+        }
+    };
+
+    const KT = {
+        state: { players: [], trump: [], opp: [], score: 250, win: "", history: [] },
+        start: (names) => {
+            KT.state.players = [...names]; KT.state.history = [];
+            document.getElementById('kt-placeholder').style.display = 'none';
+            document.getElementById('kt-active-game').classList.add('desktop-grid');
+            document.getElementById('kt-active-game').style.display = window.innerWidth >= 768 ? 'grid' : 'block';
+            KT.resetRound();
+        },
+        resetRound: () => {
+            KT.state.trump = []; KT.state.opp = [...KT.state.players];
+            KT.state.score = 250; KT.state.win = "";
+            KT.render();
+        },
+        togTeam: (p) => {
+            if(KT.state.trump.includes(p)) { KT.state.trump = KT.state.trump.filter(x=>x!==p); KT.state.opp.push(p); }
+            else { KT.state.trump.push(p); KT.state.opp = KT.state.opp.filter(x=>x!==p); }
+            KT.render();
+        },
+        adjustScore: (d) => { KT.state.score = Math.max(1, KT.state.score + d); KT.render(); },
+        setWinner: (w) => { KT.state.win = w; KT.render(); },
+        recordScore: () => {
+            if(!KT.state.win || KT.state.trump.length===0 || KT.state.opp.length===0) return;
+            KT.state.history.push({ t: [...KT.state.trump], o: [...KT.state.opp], s: KT.state.score, w: KT.state.win, status: 'active' });
+            KT.resetRound();
+        },
+        delGame: (idx) => { if(confirm("Void record?")) { KT.state.history[idx].status = 'deleted'; KT.render(); } },
+        render: () => {
+            const tb = document.getElementById('kt-team-board');
+            tb.innerHTML = KT.state.players.map(p => `<button class="pill ${KT.state.trump.includes(p)?'active-trump':''}" onclick="KT.togTeam('${p}')">${p}</button>`).join('');
+            
+            document.getElementById('kt-score-input').value = KT.state.score;
+            document.getElementById('kt-win-trump').style.background = KT.state.win==='trump' ? 'var(--blue)' : '';
+            document.getElementById('kt-win-opp').style.background = KT.state.win==='opp' ? 'var(--red)' : '';
+            document.getElementById('kt-record-btn').disabled = !(KT.state.win && KT.state.trump.length && KT.state.opp.length);
+
+            let s={}, g={}, w={};
+            KT.state.players.forEach(p => { s[p]=0; g[p]=0; w[p]=0; });
+            KT.state.history.filter(x=>x.status==='active').forEach(r => {
+                r.t.forEach(p => { g[p]++; if(r.w==='trump'){ s[p]+=r.s; w[p]++; } });
+                r.o.forEach(p => { g[p]++; if(r.w==='opp'){ s[p]+=(r.s*2); w[p]++; } });
+            });
+
+            document.getElementById('kt-leaderboard').innerHTML = [...KT.state.players].sort((a,b)=>s[b]-s[a]).map(p => {
+                return `<tr><td>${p}</td><td style="font-weight:700; color:var(--gold);">${s[p]}</td><td>${g[p]}</td><td>${g[p]?((w[p]/g[p])*100).toFixed(0):0}%</td></tr>`;
+            }).join('');
+
+            document.getElementById('kt-history-head').innerHTML = `<tr><th>#</th>${KT.state.players.map(n=>`<th>${n.substring(0,3)}</th>`).join('')}<th>Act</th></tr>`;
+            document.getElementById('kt-history-body').innerHTML = KT.state.history.map((r, i) => {
+                let tr = `<tr class="${r.status==='deleted'?'struck':''}"><td>${i+1}</td>`;
+                KT.state.players.forEach(p => {
+                    let scr = "-";
+                    if(r.t.includes(p) && r.w==='trump') scr = `<span class="score-made">${r.s}</span>`;
+                    if(r.o.includes(p) && r.w==='opp') scr = `<span class="score-made">${r.s*2}</span>`;
+                    tr += `<td>${scr}</td>`;
+                });
+                tr += `<td>${r.status==='active' ? `<button class="btn-ghost" style="color:var(--gold); padding:2px 6px;" onclick="MODAL.open('kt',${i})">✎</button> <button class="btn-danger" style="padding:2px 6px;" onclick="KT.delGame(${i})">X</button>` : '-'}</td></tr>`;
+                return tr;
+            }).join('');
+        }
+    };
+
+    window.addEventListener('resize', () => {
+        if(APP.currentModule === 'kachuful' && document.getElementById('kf-active-game').style.display !== 'none') {
+            document.getElementById('kf-active-game').style.display = window.innerWidth >= 768 ? 'grid' : 'block';
+        }
+        if(APP.currentModule === 'kalitiri' && document.getElementById('kt-active-game').style.display !== 'none') {
+            document.getElementById('kt-active-game').style.display = window.innerWidth >= 768 ? 'grid' : 'block';
+        }
+    });
+
+    APP.renderSavedPlayers();
+    I18N.render();
+</script>
+</body>
+</html>
