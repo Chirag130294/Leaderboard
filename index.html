@@ -53,7 +53,6 @@
         .pill { background: rgba(33, 38, 45, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 8px 15px; border-radius: var(--radius-pill); font-size: 0.9rem; font-weight: 600; cursor: pointer; }
         .pill.active-trump { background: var(--blue); color: white; border-color: var(--blue); }
 
-        /* App Header */
         .app-header {
             position: fixed; top: 0; left: 0; right: 0; height: max(65px, env(safe-area-inset-top));
             background: rgba(13, 17, 23, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
@@ -79,7 +78,6 @@
         .header-right { display: flex; align-items: center; }
         #header-finish-btn { padding: 6px 12px; font-size: 0.8rem; border-color: var(--gold); color: var(--gold); display: none; }
 
-        /* Slide Menu */
         .slide-menu {
             position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
             background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(15px); border-right: 1px solid var(--border);
@@ -92,7 +90,6 @@
         .menu-header { padding: 10px 20px 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; font-weight: 800; font-size: 1.2rem; color: var(--gold); }
         .slide-menu button { text-align: left; padding: 15px 20px; font-size: 1rem; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 15px; }
 
-        /* Screen Transition Card Wipe */
         .screen-wipe {
             position: fixed; inset: 0; background: rgba(13, 17, 23, 0.6); backdrop-filter: blur(8px);
             z-index: 4000; pointer-events: none; opacity: 0; transition: opacity 0.2s ease;
@@ -106,7 +103,6 @@
         }
         .screen-wipe.active .wipe-card { transform: translateX(0) rotate(0deg); }
 
-        /* Global Layer 0: Background Animation */
         .card-rain-container { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; perspective: 1200px; display: block; }
         .realistic-card {
             position: absolute; width: 45px; height: 65px; background: #ffffff;
@@ -120,14 +116,12 @@
             100% { transform: translateY(calc(100vh + 200px)) rotateX(var(--rotX)) rotateY(var(--rotY)) rotateZ(var(--rotZ)); }
         }
 
-        /* Layer 10: Splash Screen (Transparent Background to reveal Card Rain) */
         #view-splash {
             position: fixed; inset: 0; z-index: 2000; background: transparent; 
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             padding: 20px; transition: opacity 0.5s ease;
         }
         
-        /* Removed glass properties: background, border, blur, and shadow */
         .welcome-content { 
             z-index: 2; text-align: center; width: 100%; opacity: 0; transform: scale(0.9); 
             animation: popIn 0.8s 0.2s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); 
@@ -136,7 +130,6 @@
         .greeting { font-size: 2.2rem; font-weight: 800; color: var(--gold); margin-bottom: 5px; text-shadow: 0 4px 15px rgba(0,0,0,0.9); }
         .sub-greeting { font-size: 1.1rem; color: var(--text); margin-bottom: 30px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
         
-        /* Premium Custom Card Thumbnails */
         .card-icon-kt {
             width: 48px; height: 65px; border-radius: 6px; background: linear-gradient(135deg, #fdfdfd, #e0e0e0);
             display: flex; flex-direction: column; align-items: center; justify-content: space-between;
@@ -148,7 +141,6 @@
             align-items: center; justify-items: center; font-size: 1.1rem; padding: 2px;
         }
 
-        /* 3D Glow Game Selection Buttons */
         @keyframes glowPulseGold {
             0% { box-shadow: 0 0 10px rgba(210, 153, 34, 0.3), 0 6px 0 rgba(210, 153, 34, 0.7); transform: translateY(0); }
             50% { box-shadow: 0 0 25px rgba(210, 153, 34, 0.8), 0 6px 0 rgba(210, 153, 34, 0.7); transform: translateY(-2px); }
@@ -173,10 +165,8 @@
         .game-select-btn.kt { border-color: rgba(31, 111, 235, 0.8); animation: glowPulseBlue 2.5s infinite; animation-delay: 1.25s; }
         .game-select-btn:active { animation-play-state: paused; transform: translateY(4px) !important; }
 
-        /* Main Container - Hidden initially to prevent background bleeding */
         #main-container { display: none; padding-top: max(85px, env(safe-area-inset-top)); padding-bottom: max(40px, env(safe-area-inset-bottom)); position: relative; z-index: 2; }
 
-        /* Cry Animation Overlay (Top Layer) */
         .cry-overlay {
             position: fixed; inset: 0; z-index: 5000; pointer-events: none;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -196,37 +186,46 @@
             75% { transform: translateY(10px) rotate(-10deg) scale(1.1); }
         }
 
-        /* Dynamic Single Column Kachuful Fit CSS */
-        #kf-active-game .panel { padding: clamp(10px, 2vh, 15px); margin-bottom: clamp(5px, 1vh, 15px); gap: clamp(5px, 1vh, 15px); }
+        /* --- DYNAMIC KACHUFUL COMPRESSION CSS --- */
+        #kf-active-game .panel { padding: clamp(4px, 1vh, 8px); margin-bottom: clamp(2px, 0.5vh, 8px); gap: clamp(2px, 0.5vh, 6px); }
+        #kf-header-panel { padding: clamp(4px, 1vh, 10px) !important; margin-bottom: clamp(2px, 0.5vh, 5px) !important; }
         
         #kf-player-rows { display: flex; flex-direction: column; gap: 0; }
         
         .kf-player-row { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: clamp(2px, 0.5vh, 6px) 0; 
+            display: flex; align-items: center; 
+            padding: clamp(1px, 0.2vh, 4px) 0; 
             border-bottom: 1px solid rgba(255,255,255,0.05); 
-            height: clamp(28px, calc(45vh / 12), 40px); /* Dynamically shrinks up to 12 rows to fit screen height */
+            height: clamp(22px, calc(45vh / 12), 34px);
         }
         .kf-player-row:last-child { border-bottom: none; }
-        .kf-player-name { font-weight: 600; font-size: clamp(0.8rem, 2vh, 1rem); width: 45%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .kf-player-name { 
+            font-weight: 600; font-size: clamp(0.8rem, 1.8vh, 1rem); 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+        }
 
-        .stepper { display: flex; align-items: center; gap: 4px; }
-        .stepper button { width: clamp(24px, 4vh, 32px); height: clamp(24px, 4vh, 32px); border-radius: 6px; font-size: clamp(1rem, 2vh, 1.2rem); font-weight: 800; color: white; display: flex; align-items: center; justify-content: center; }
+        /* Reduced Stepper & Input Size (-20%) */
+        .stepper { display: flex; align-items: center; gap: 4px; margin-left: 0; }
+        .stepper button { width: clamp(19px, 3.2vh, 25px); height: clamp(19px, 3.2vh, 25px); border-radius: 4px; font-size: clamp(0.8rem, 1.6vh, 0.95rem); font-weight: 800; color: white; display: flex; align-items: center; justify-content: center; }
         .stepper .btn-minus { background: var(--red); }
         .stepper .btn-plus { background: var(--green); }
-        .stepper input { text-align: center; font-weight: 800; font-size: clamp(0.9rem, 2vh, 1.1rem); padding: 0; height: clamp(24px, 4vh, 32px); border: none; background: transparent; width: clamp(26px, 4vh, 34px); margin: 0; color: white;}
+        .stepper input { text-align: center; font-weight: 800; font-size: clamp(0.7rem, 1.6vh, 0.9rem); padding: 0; height: clamp(19px, 3.2vh, 25px); border: none; background: transparent; width: clamp(21px, 3.2vh, 27px); margin: 0; color: white;}
         
-        .kf-pill-status { width: clamp(75px, 18vw, 85px); padding: clamp(4px, 1vh, 6px) 0; text-align: center; border-radius: var(--radius-pill); font-weight: 700; font-size: clamp(0.75rem, 1.5vh, 0.85rem); border: 2px solid transparent; }
-        .kf-pill-made { background: var(--green); color: white; }
-        .kf-pill-miss { background: transparent; border-color: var(--red); color: var(--red); }
+        /* Reduced Pill Size (-20%) & Dimmer Colors */
+        .kf-pill-status { margin-left: 0; width: clamp(60px, 14.4vw, 68px); padding: clamp(3px, 0.8vh, 5px) 0; text-align: center; border-radius: var(--radius-md); font-weight: 700; font-size: clamp(0.6rem, 1.2vh, 0.68rem); border: 2px solid transparent; }
+        .kf-pill-made { background: #1a6327; color: #d0ebd5; border: 1px solid #238636; }
+        .kf-pill-miss { background: rgba(218, 54, 51, 0.1); border-color: #a32a28; color: #e89594; }
 
-        .card-thumbnail-compact { background: #ffffff; border-radius: 8px; width: clamp(40px, 10vw, 55px); height: clamp(55px, 14vw, 80px); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.6); border: 2px solid #fff; }
-        .card-symbol-compact { font-size: clamp(1.8rem, 5vw, 2.5rem); line-height: 1; }
-        .card-count-huge { font-weight: 800; background: rgba(0,0,0,0.5); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); padding: clamp(4px, 1vh, 6px) clamp(8px, 2vw, 12px); font-size: clamp(0.85rem, 2.5vw, 1rem);}
+        /* Dynamic Header Adjustments */
+        .card-thumbnail-compact { background: #ffffff; border-radius: 8px; width: clamp(30px, 6vw, 45px); height: clamp(40px, 8vh, 60px); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.6); border: 2px solid #fff; }
+        .card-symbol-compact { font-size: clamp(1.4rem, 3.5vh, 2rem); line-height: 1; }
+        .card-count-huge { font-weight: 800; background: rgba(0,0,0,0.5); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); padding: clamp(2px, 0.5vh, 4px) clamp(6px, 1.5vw, 10px); font-size: clamp(0.75rem, 1.8vh, 0.95rem);}
+        #kf-round-label { font-size: clamp(0.6rem, 1.5vh, 0.75rem); }
         
-        #kf-action-btn, #kf-active-game .btn-ghost { padding: clamp(10px, 2vh, 14px) 0; font-size: clamp(0.9rem, 2vh, 1rem); }
+        /* Reduced Action Button Size */
+        #kf-action-btn, #kf-active-game .btn-ghost { padding: clamp(6px, 1.2vh, 10px) 0; font-size: clamp(0.8rem, 1.5vh, 0.9rem); }
 
-        /* General UI forms */
         .multi-stepper { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 6px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.1); width: 100%; gap: 6px; }
         .multi-stepper .btn-group { display: flex; flex: 1; gap: 4px; }
         .multi-stepper .btn-group button { flex: 1; padding: 10px 2px; font-weight: 700; border-radius: 6px; color: white; font-size: clamp(0.7rem, 2.5vw, 0.85rem); }
@@ -250,20 +249,22 @@
         .score-made { color: var(--green); font-weight: 700; }
         .score-miss { color: var(--red); }
 
-        /* Modals */
         .modal { display: flex; position: fixed; inset: 0; align-items: center; justify-content: center; padding: 15px; z-index: 3000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
         .modal.active { opacity: 1; pointer-events: auto; }
         .modal-content { position: relative; margin: auto; background: rgba(22, 27, 34, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-lg); padding: 20px; width: 100%; max-width: 350px; max-height: 85vh; overflow-y: auto; box-shadow: 0 15px 40px rgba(0,0,0,0.8); transform: scale(0.8); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2; }
         .modal.active .modal-content { transform: scale(1); }
         
-        /* Share Modal Layout */
-        .snapshot-card { position: relative; margin: auto; background: linear-gradient(145deg, #161b22, #0d1117); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: 15px 12px; text-align: center; box-shadow: 0 10px 40px rgba(210, 153, 34, 0.3); overflow: hidden; transform: scale(0.8); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: 100%; max-width: 380px; max-height: 98vh; display: flex; flex-direction: column; z-index: 2; }
+        /* Dynamic Share Modal Layout */
+        .snapshot-card { position: relative; margin: auto; background: linear-gradient(145deg, #161b22, #0d1117); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: 10px; text-align: center; box-shadow: 0 10px 40px rgba(210, 153, 34, 0.3); overflow: hidden; transform: scale(0.8); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: 100%; max-width: 380px; max-height: 98vh; display: flex; flex-direction: column; z-index: 2; }
         .modal.active .snapshot-card { transform: scale(1); }
-        .snapshot-card::before { content: "🏆"; position: absolute; font-size: 150px; opacity: 0.05; top: -20px; right: -20px; pointer-events: none; }
-        #endgame-results { overflow: hidden; }
-        .rank-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 6px 10px; border-radius: var(--radius-md); margin-bottom: 4px; border: 1px solid rgba(255,255,255,0.05); position: relative; z-index: 1; }
-        .rank-row.first { background: rgba(210, 153, 34, 0.15); border-color: var(--gold); }
+        .snapshot-card::before { content: "🏆"; position: absolute; font-size: 100px; opacity: 0.05; top: -30px; right: -30px; pointer-events: none; }
+        
+        #endgame-results { overflow-y: hidden; }
+        
+        .icon-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 4px; flex: 1; border-radius: var(--radius-md); transition: 0.2s; }
+        .icon-btn:hover { filter: brightness(1.2); }
+
         .developed-by { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 15px; text-align: center; font-weight: 600; letter-spacing: 1px;}
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -277,21 +278,17 @@
 </head>
 <body>
 
-<!-- Global Layer 0: Continuous Background Card Rain -->
 <div class="card-rain-container" id="card-rain"></div>
 
-<!-- Card Theme Screen Wipe -->
 <div id="screen-wipe" class="screen-wipe">
     <div class="wipe-card" id="wipe-card-symbol" style="color:var(--suit-black);">♠</div>
 </div>
 
-<!-- Cry Overlay for 3 Misses -->
 <div id="cry-overlay" class="cry-overlay">
     <div class="cry-emoji">😭</div>
     <div id="cry-text" class="cry-text">Player Missed 3 in a Row!</div>
 </div>
 
-<!-- Layer 10: Splash Screen (Transparent Background to reveal Card Rain) -->
 <div id="view-splash">
     <div class="welcome-content">
         <div class="greeting" id="splash-greeting">Good Morning</div>
@@ -323,9 +320,7 @@
     </div>
 </div>
 
-<!-- Layer 2: Main App Content (Hidden Initially to prevent background bleeding) -->
 <div id="main-container">
-    <!-- Main Header -->
     <header class="app-header">
         <div class="header-left">
             <button class="hamburger" onclick="UI.toggleMenu()">☰</button>
@@ -340,7 +335,6 @@
         </div>
     </header>
 
-    <!-- Slide-in Menu -->
     <div class="menu-overlay" id="menu-overlay" onclick="UI.toggleMenu()"></div>
     <div class="slide-menu" id="slide-menu">
         <div class="menu-header">Menu</div>
@@ -358,15 +352,13 @@
         <div class="developed-by" style="padding-bottom: 20px;">Crafted by Chirag Patel</div>
     </div>
 
-    <!-- Container for App Views -->
     <div class="container" style="padding: 0 10px;">
-
         <!-- ================= SETUP ================= -->
         <div id="view-setup" class="view-section active">
             <div class="panel stack" style="max-width: 500px; margin: 0 auto;">
                 <h2 class="text-center" id="setup-title">Player Setup</h2>
                 <p class="tiny text-center">Add players by typing names separated by spaces or commas.</p>
-                <textarea id="setup-input" rows="2" placeholder="e.g. Chirag Ritu Nishit Dhruvin"></textarea>
+                <textarea id="setup-input" rows="2" placeholder="e.g. Chirag Foram Ritu Nishit"></textarea>
                 <div id="saved-players-container" style="display:none;">
                     <span class="tiny">Recent Players (Tap to add):</span>
                     <div id="saved-players-list" class="pill-container" style="margin-top:5px;"></div>
@@ -385,7 +377,7 @@
 
             <div id="kf-active-game" style="display: none;" class="desktop-grid">
                 <div class="stack">
-                    <div class="panel flex-between" style="padding: 15px;">
+                    <div class="panel flex-between" id="kf-header-panel">
                         <div class="tiny" id="kf-round-label" style="font-size: 0.65rem; opacity: 0.5; font-weight:800; letter-spacing:1px;">R1</div>
                         <div id="kf-trump-card" class="card-thumbnail-compact pulse-anim" style="margin: 0 15px;">
                             <div id="kf-card-symbol" class="card-symbol-compact" style="color: var(--suit-black);">♠</div>
@@ -398,10 +390,9 @@
 
                     <div class="panel stack">
                         <div class="kf-player-list-wrapper">
-                            <!-- Adjusted to dynamically scaling Single Column stack -->
                             <div id="kf-player-rows"></div>
                         </div>
-                        <div style="margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                        <div style="margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">
                             <div id="kf-warning-msg" style="color: var(--gold); font-size: 0.85rem; font-weight: 800; text-align: center; display: none; margin-bottom: 4px;"></div>
                             <div style="display:flex; gap:10px;">
                                 <button class="btn-ghost" style="flex: 0 0 60px;" onclick="KF.resetRound()">Reset</button>
@@ -534,24 +525,34 @@
     <div class="modal-bg"></div>
     <div class="snapshot-card stack" id="shareable-content">
         <div class="developed-by" style="margin-top:0; margin-bottom:0; font-size:0.7rem;">Crafted by Chirag Patel</div>
-        <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:5px;">
+        <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:2px;">
             <div id="endgame-logo" class="game-thumb" style="display:flex; position:static;"></div>
-            <h2 id="endgame-title" style="margin:0; font-size:1.6rem; color:var(--gold); font-weight:800; letter-spacing:1px; line-height:1;"></h2>
+            <h2 id="endgame-title" style="margin:0; color:var(--gold); font-weight:800; letter-spacing:1px; line-height:1;"></h2>
         </div>
-        <h3 style="margin-bottom: 5px; color: #fff;">🏆 Final Standings 🏆</h3>
-        <div id="endgame-results" class="stack" style="gap: 6px;"></div>
-        <p class="tiny text-center" id="share-instruction" style="margin-top:10px; margin-bottom:5px; font-weight: 600; color: var(--green);">Ready to share!</p>
-        <div id="endgame-action-buttons" style="display:flex; flex-direction:column; gap:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
-            <button class="btn-primary" style="padding:10px; background-color: #25D366; border: none;" onclick="APP.shareResults()">Share Results 📲</button>
-            <button class="btn-green" style="padding:10px;" onclick="APP.restartGame(true)">Play Again (Same Players)</button>
-            <button class="btn-primary" style="padding:10px;" onclick="APP.restartGame(false)">Play Again (Edit Players)</button>
-            <button class="btn-ghost" style="padding:10px;" onclick="UI.closeModal('modal-share'); location.reload();">Home Screen</button>
+        <h3 id="endgame-subtitle" style="margin-bottom: 5px; color: #fff;">🏆 Final Standings 🏆</h3>
+        
+        <div id="endgame-results"></div>
+        
+        <p class="tiny text-center" id="share-instruction" style="margin-top:10px; margin-bottom:0px; font-weight: 600; color: var(--green);">Ready to share!</p>
+        
+        <div id="endgame-action-buttons" style="display:flex; flex-direction:row; justify-content:space-between; gap:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px; margin-top:5px;">
+            <button class="btn-primary icon-btn" style="background-color: #25D366;" onclick="APP.shareResults()" title="Share Results">
+                <span style="font-size:clamp(1.2rem, 3vh, 1.5rem);">📤</span><span style="font-size:0.5rem; display:block; line-height:1; margin-top:4px;">Share</span>
+            </button>
+            <button class="btn-green icon-btn" onclick="APP.restartGame(true)" title="Play Again (Same Players)">
+                <span style="font-size:clamp(1.2rem, 3vh, 1.5rem);">🔄</span><span style="font-size:0.5rem; display:block; line-height:1; margin-top:4px;">Same</span>
+            </button>
+            <button class="btn-primary icon-btn" onclick="APP.restartGame(false)" title="Play Again (Edit Players)">
+                <span style="font-size:clamp(1.2rem, 3vh, 1.5rem);">👥</span><span style="font-size:0.5rem; display:block; line-height:1; margin-top:4px;">Edit</span>
+            </button>
+            <button class="btn-ghost icon-btn" onclick="UI.closeModal('modal-share'); location.reload();" title="Home Screen">
+                <span style="font-size:clamp(1.2rem, 3vh, 1.5rem);">🏠</span><span style="font-size:0.5rem; display:block; line-height:1; margin-top:4px;">Home</span>
+            </button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- AUDIO ENGINE (STRICTLY RESTRICTED TO DEFINED GAME SCENARIOS) ---
     const Sound = {
         ctx: null,
         init: () => {
@@ -593,7 +594,6 @@
         }
     };
 
-    // Card Swipe Transition (Visual Only, No Sound)
     const transitionScreen = async (callback) => {
         const wipe = document.getElementById('screen-wipe');
         const suits = ['♠','♥','♦','♣'];
@@ -608,7 +608,6 @@
         wipe.classList.remove('active');
     };
 
-    // Play crying animation
     const showCryOverlay = (playerName) => {
         Sound.init(); Sound.play('cry');
         const overlay = document.getElementById('cry-overlay');
@@ -718,7 +717,6 @@
                 }
             }
 
-            // Generate Background Animation Cards
             const rain = document.getElementById('card-rain');
             rain.innerHTML = '';
             const suits = [{s:'♠',c:'var(--suit-black)'}, {s:'♥',c:'var(--suit-red)'}, {s:'♦',c:'var(--suit-red)'}, {s:'♣',c:'var(--suit-black)'}];
@@ -861,26 +859,68 @@
         showEndGame: () => {
             if(!APP.currentModule) return UI.showAlert("Notice", "No active game to finish.");
             Sound.init(); Sound.play('win');
-            let html = ''; APP.lastGame = APP.currentModule;
-
+            APP.lastGame = APP.currentModule;
+            
+            let sorted = []; let s = {};
             if(APP.currentModule === 'kachuful') {
                 APP.lastPlayers = [...KF.state.original];
                 document.getElementById('endgame-title').innerText = "KACHUFUL"; document.getElementById('endgame-logo').className = "game-thumb thumb-kf"; document.getElementById('endgame-logo').innerText = "KF";
-                const sorted = [...KF.state.players].sort((a,b)=>b.score-a.score);
-                sorted.forEach((p, i) => { let medal = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':`#${i+1}`)); html += `<div class="rank-row ${i===0?'first':''}"><div style="font-weight:800; font-size:1rem;">${medal} ${p.name}</div><div style="font-weight:800; font-size:1.1rem; color:var(--green);">${p.score}</div></div>`; });
+                sorted = [...KF.state.players].sort((a,b)=>b.score-a.score);
                 localStorage.removeItem('saved_kf');
             } else {
                 APP.lastPlayers = [...KT.state.players];
                 document.getElementById('endgame-title').innerText = "KALI TIRI"; document.getElementById('endgame-logo').className = "game-thumb thumb-kt"; document.getElementById('endgame-logo').innerText = "KT";
-                let s={}; KT.state.players.forEach(p=>s[p]=0);
+                KT.state.players.forEach(p=>s[p]=0);
                 KT.state.history.filter(x=>x.status==='active').forEach(r => { r.t.forEach(p => { if(r.w==='trump') s[p]+=r.s; }); r.o.forEach(p => { if(r.w==='opp') s[p]+=(r.s*2); }); });
-                const sorted = [...KT.state.players].sort((a,b)=>s[b]-s[a]);
-                sorted.forEach((p, i) => { let medal = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':`#${i+1}`)); html += `<div class="rank-row ${i===0?'first':''}"><div style="font-weight:800; font-size:1rem;">${medal} ${p}</div><div style="font-weight:800; font-size:1.1rem; color:var(--green);">${s[p]}</div></div>`; });
+                sorted = [...KT.state.players].sort((a,b)=>s[b]-s[a]);
                 localStorage.removeItem('saved_kt');
             }
+
+            const isMany = sorted.length >= 14;
+            const resContainer = document.getElementById('endgame-results');
+            resContainer.style.display = 'grid';
+            resContainer.style.gridTemplateColumns = isMany ? '1fr 1fr' : '1fr';
+            resContainer.style.columnGap = '8px';
+            resContainer.style.rowGap = '4px';
+
+            const titleEl = document.getElementById('endgame-title');
+            const subtitleEl = document.getElementById('endgame-subtitle');
+            const logoEl = document.getElementById('endgame-logo');
             
+            if (sorted.length > 8) {
+                titleEl.style.fontSize = '1.2rem';
+                subtitleEl.style.fontSize = '0.85rem';
+                subtitleEl.style.marginBottom = '0px';
+                logoEl.style.width = '28px';
+                logoEl.style.height = '28px';
+                logoEl.style.fontSize = '0.7rem';
+            } else {
+                titleEl.style.fontSize = '1.6rem';
+                subtitleEl.style.fontSize = '1.1rem';
+                subtitleEl.style.marginBottom = '5px';
+                logoEl.style.width = '36px';
+                logoEl.style.height = '36px';
+                logoEl.style.fontSize = '0.9rem';
+            }
+
+            let html = '';
+            sorted.forEach((p, i) => { 
+                let medal = i===0?'🥇':(i===1?'🥈':(i===2?'🥉':`#${i+1}`)); 
+                let rowPad = sorted.length > 8 ? 'clamp(2px, 0.5vh, 4px) 8px' : 'clamp(6px, 1.5vh, 10px) 12px';
+                let nameF = sorted.length > 8 ? 'clamp(0.75rem, 1.6vh, 0.9rem)' : 'clamp(0.9rem, 2vh, 1.1rem)';
+                let scoreF = sorted.length > 8 ? 'clamp(0.85rem, 1.8vh, 1rem)' : 'clamp(1.1rem, 2.5vh, 1.3rem)';
+
+                html += `<div class="rank-row ${i===0?'first':''}" style="padding: ${rowPad}; margin-bottom: 0; display:flex; flex-direction:row; justify-content:space-between; align-items:center; flex-wrap:nowrap;">
+                            <div style="display:flex; align-items:center; flex: 1; min-width: 0; margin-right:5px;">
+                                <span class="medal-icon" style="font-weight:800; font-size:${nameF}; min-width:25px; text-align:left;">${medal}</span>
+                                <span class="rank-name" style="font-weight:800; font-size:${nameF}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:left; flex:1;">${APP.currentModule==='kachuful'?p.name:p}</span>
+                            </div>
+                            <div class="rank-score" style="font-weight:800; font-size:${scoreF}; color:var(--green); flex: 0 0 auto;">${APP.currentModule==='kachuful'?p.score:s[p]}</div>
+                         </div>`; 
+            });
+
             localStorage.removeItem('active_game'); APP.currentModule = null; 
-            document.getElementById('endgame-results').innerHTML = html;
+            resContainer.innerHTML = html;
             UI.updateHeader('setup'); UI.showModal('modal-share');
         },
 
@@ -943,7 +983,7 @@
             KF.state.original.forEach((n, i) => {
                 const statusStr = MODAL.state.misses[i] ? 'Missed' : 'Made';
                 const statusCls = MODAL.state.misses[i] ? 'kf-pill-miss' : 'kf-pill-made';
-                html += `<div class="kf-player-row"><div class="kf-player-name">${n}</div><div class="stepper"><button class="btn-minus" onclick="MODAL.adjKFBid(${i}, -1, ${max})">−</button><input readonly value="${MODAL.state.bids[i]}"><button class="btn-plus" onclick="MODAL.adjKFBid(${i}, 1, ${max})">+</button></div><button class="kf-pill-status ${statusCls}" onclick="MODAL.togKFMiss(${i})">${statusStr}</button></div>`;
+                html += `<div class="kf-player-row" style="justify-content: flex-start; gap: 15px;"><div class="kf-player-name" style="flex: none; width: clamp(75px, 20vw, 100px);">${n}</div><div class="stepper"><button class="btn-minus" onclick="MODAL.adjKFBid(${i}, -1, ${max})">−</button><input readonly value="${MODAL.state.bids[i]}"><button class="btn-plus" onclick="MODAL.adjKFBid(${i}, 1, ${max})">+</button></div><button class="kf-pill-status ${statusCls}" style="margin-left: auto;" onclick="MODAL.togKFMiss(${i})">${statusStr}</button></div>`;
             });
             document.getElementById('edit-modal-body').innerHTML = html;
         },
@@ -998,7 +1038,6 @@
                     const b = KF.state.bids[i], made = !KF.state.misses[i], pts = made ? (b === 0 ? 10 : b * 11) : 0; 
                     p.score += pts; rec.data[p.name] = { b, made, pts }; 
 
-                    // 3-Miss Tracking
                     if (!made) {
                         KF.state.streaks[p.name] = (KF.state.streaks[p.name] || 0) + 1;
                         if(KF.state.streaks[p.name] >= 3) cryingPlayer = p.name;
@@ -1037,8 +1076,13 @@
             }
 
             KF.state.players.forEach((p, i) => {
-                const ctrl = KF.state.phase === 'bid' ? `<div class="stepper"><button class="btn-minus" onclick="KF.adjBid(${i},-1)">−</button><input readonly value="${KF.state.bids[i]}"><button class="btn-plus" onclick="KF.adjBid(${i},1)">+</button></div>` : `<button class="kf-pill-status ${KF.state.misses[i]?'kf-pill-miss':'kf-pill-made'}" onclick="KF.togMiss(${i})">${KF.state.misses[i]?'Missed':'Made'} ${KF.state.bids[i]}</button>`;
-                pRows.innerHTML += `<div class="kf-player-row"><div class="kf-player-name">${p.name}</div>${ctrl}</div>`;
+                if (KF.state.phase === 'bid') {
+                    const ctrl = `<div class="stepper"><button class="btn-minus" onclick="KF.adjBid(${i},-1)">−</button><input readonly value="${KF.state.bids[i]}"><button class="btn-plus" onclick="KF.adjBid(${i},1)">+</button></div>`;
+                    pRows.innerHTML += `<div class="kf-player-row" style="justify-content: flex-start; gap: 15px;"><div class="kf-player-name" style="flex: none; width: clamp(75px, 20vw, 100px);">${p.name}</div>${ctrl}</div>`;
+                } else {
+                    const ctrl = `<button class="kf-pill-status ${KF.state.misses[i]?'kf-pill-miss':'kf-pill-made'}" onclick="KF.togMiss(${i})">${KF.state.misses[i]?'Missed':'Made'} ${KF.state.bids[i]}</button>`;
+                    pRows.innerHTML += `<div class="kf-player-row" style="justify-content: flex-start; gap: 15px;"><div class="kf-player-name" style="flex: none; width: clamp(75px, 20vw, 100px);">${p.name}</div>${ctrl}</div>`;
+                }
             });
 
             document.getElementById('kf-leaderboard').innerHTML = [...KF.state.players].sort((a,b)=>b.score-a.score).map((p,i) => `<div class="pill"><span style="color:var(--gold); margin-right:4px;">#${i+1}</span> ${p.name}: <strong>${p.score}</strong></div>`).join('');
