@@ -1,39 +1,547 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Game Score Leaderboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
-        :root {
-            --bg-color: #0d1117; --surface: #161b22; --border: #30363d;
-            --text: #c9d1d9; --text-muted: #8b949e; --green: #238636; --red: #da3633;
-            --blue: #1f6feb; --gold: #d29922; --suit-black: #000000; --suit-red: #d73a49;
-            --radius-md: 8px; --radius-lg: 12px; --radius-pill: 50px;
-            font-family: 'Work Sans', sans-serif;
-        }
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body {
-            background-color: var(--bg-color); color: var(--text); line-height: 1.5;
-            -webkit-tap-highlight-color: transparent; overflow-x: hidden; min-height: 100vh;
-        }
-
-        button { font-family: inherit; border: none; background: none; cursor: pointer; color: inherit; transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+        :root { --bg-color: #0d1117; --surface: #161b22; --border: #30363d; --text: #c9d1d9; --text-muted: #8b949e; --green: #238636; --red: #da3633; --blue: #1f6feb; --gold: #d29922; --suit-black: #000000; --suit-red: #d73a49; --radius-md: 8px; --radius-lg: 12px; --radius-pill: 50px; font-family: "Work Sans", sans-serif; }
+        *, ::before, ::after { box-sizing: border-box; margin: 0px; padding: 0px; }
+        body { background-color: var(--bg-color); color: var(--text); line-height: 1.5; -webkit-tap-highlight-color: transparent; overflow-x: hidden; min-height: 100vh; }
+        button { font-family: inherit; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; background: none; cursor: pointer; color: inherit; transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
         button:active { transform: scale(0.95); }
         button:disabled { opacity: 0.5; pointer-events: none; }
-        input, textarea { font-family: inherit; color: inherit; width: 100%; padding: 12px; background: rgba(13, 17, 23, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); font-size: 1rem; transition: border-color 0.3s; text-align: left; }
+        input, textarea { font-family: inherit; color: inherit; width: 100%; padding: 12px; background: rgba(13, 17, 23, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-md); font-size: 1rem; transition: border-color 0.3s; text-align: left; }
         input:focus, textarea:focus { outline: none; border-color: var(--blue); }
-
-        h1, h2, h3 { font-weight: 700; color: #ffffff; }
+        h1, h2, h3 { font-weight: 700; color: rgb(255, 255, 255); }
         .tiny { font-size: 0.75rem; color: var(--text-muted); }
         .text-center { text-align: center; }
-
-        .view-section { display: none; padding: 20px 10px; position: relative; z-index: 2; animation: fadeIn 0.3s ease;}
+        .view-section { display: none; padding: 20px 10px; position: relative; z-index: 2; animation: 0.3s ease 0s 1 normal none running fadeIn; }
         .view-section.active { display: block; }
+        .panel { background: rgba(22, 27, 34, 0.25); backdrop-filter: blur(2px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 15px; box-shadow: rgba(0, 0, 0, 0.5) 0px 8px 30px; }
+        .stack { display: flex; flex-direction: column; gap: 15px; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .btn-primary { background: var(--blue); color: white; padding: 14px 20px; border-radius: var(--radius-md); font-weight: 700; width: 100%; font-size: 1rem; }
+        .btn-green { background: var(--green); color: white; padding: 14px 20px; border-radius: var(--radius-md); font-weight: 700; width: 100%; font-size: 1rem; }
+        .btn-danger { background: var(--red); color: white; padding: 14px 20px; border-radius: var(--radius-md); font-weight: 700; width: 100%; font-size: 1rem; }
+        .btn-ghost { background: transparent; color: var(--text); padding: 14px 20px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--radius-md); font-weight: 700; width: 100%; font-size: 1rem; }
+        .pill-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .pill { background: rgba(33, 38, 45, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 15px; border-radius: var(--radius-pill); font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+        .pill.active-trump { background: var(--blue); color: white; border-color: var(--blue); }
+        .app-header { position: fixed; top: 0px; left: 0px; right: 0px; height: max(65px, env(safe-area-inset-top)); background: rgba(13, 17, 23, 0.85); backdrop-filter: blur(15px); display: flex; justify-content: space-between; align-items: center; padding: max(10px, env(safe-area-inset-top)) 15px 10px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); z-index: 50; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .hamburger { font-size: 1.5rem; color: var(--text); padding: 5px; margin-right: 5px; }
+        .game-thumb { display: none; width: 36px; height: 36px; border-radius: 8px; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: white; box-shadow: rgba(0, 0, 0, 0.5) 0px 2px 8px; }
+        .thumb-setup { display: flex; background: linear-gradient(135deg, rgb(48, 54, 61), rgb(22, 27, 34)); }
+        .thumb-kf { display: flex; background: linear-gradient(135deg, var(--gold), #8a6312); }
+        .thumb-kt { display: flex; background: linear-gradient(135deg, var(--blue), #0d419d); }
+        .header-titles { display: flex; flex-direction: column; justify-content: center; }
+        .app-header h1 { font-size: 1rem; margin: 0px; line-height: 1.1; }
+        .app-header .credit { font-size: 0.65rem; color: var(--gold); font-weight: 800; text-transform: uppercase; }
+        .header-right { display: flex; align-items: center; }
+        #header-finish-btn { padding: 6px 12px; font-size: 0.8rem; border-color: var(--gold); color: var(--gold); display: none; }
+        .slide-menu { position: fixed; top: 0px; left: -260px; width: 260px; height: 100vh; background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(15px); border-right: 1px solid var(--border); z-index: 1000; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; padding-top: max(20px, env(safe-area-inset-top)); }
+        .slide-menu.open { left: 0px; box-shadow: rgba(0, 0, 0, 0.8) 5px 0px 25px; }
+        .menu-overlay { position: fixed; inset: 0px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .menu-overlay.open { opacity: 1; pointer-events: auto; }
+        .menu-header { padding: 10px 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; font-weight: 800; font-size: 1.2rem; color: var(--gold); }
+        .slide-menu button { text-align: left; padding: 15px 20px; font-size: 1rem; font-weight: 600; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; gap: 15px; }
+        .screen-wipe { position: fixed; inset: 0px; background: rgba(13, 17, 23, 0.6); backdrop-filter: blur(8px); z-index: 4000; pointer-events: none; opacity: 0; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; }
+        .screen-wipe.active { opacity: 1; pointer-events: auto; }
+        .wipe-card { width: 140px; height: 200px; background: white; border-radius: 12px; border: 4px solid rgb(238, 238, 238); box-shadow: rgba(0, 0, 0, 0.8) 0px 10px 40px; display: flex; align-items: center; justify-content: center; font-size: 5rem; transform: translateX(150vw) rotate(45deg); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .screen-wipe.active .wipe-card { transform: translateX(0px) rotate(0deg); }
+        .card-rain-container { position: fixed; inset: 0px; overflow: hidden; pointer-events: none; z-index: 0; perspective: 1200px; display: block; }
+        .realistic-card { position: absolute; width: 45px; height: 65px; background: rgb(255, 255, 255); border-radius: 4px; box-shadow: rgba(0, 0, 0, 0.4) 0px 8px 15px, rgb(244, 244, 244) 0px 0px 0px 2px inset; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.5rem; line-height: 1; user-select: none; top: -100px; animation: auto linear 0s infinite normal none running fall-and-spin; transform-style: preserve-3d; backface-visibility: visible; }
         
+        @keyframes fall-and-spin { 
+            0% { transform: translateY(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            100% { transform: translateY(calc(100vh + 200px)) rotateX(var(--rotX)) rotateY(var(--rotY)) rotateZ(var(--rotZ)); }
+        }
+
+        #view-splash { position: fixed; inset: 0px; z-index: 2000; background: rgba(13, 17, 23, 0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; transition: opacity 0.5s; }
+        .welcome-content { z-index: 2; text-align: center; width: 100%; opacity: 0; transform: scale(0.9); animation: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s 1 normal forwards running popIn; background: rgba(13, 17, 23, 0); backdrop-filter: blur(0px); padding: 40px 15px; border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: rgba(0, 0, 0, 0.8) 0px 20px 50px; }
+        .greeting { font-size: 2.2rem; font-weight: 800; color: var(--gold); margin-bottom: 5px; text-shadow: rgba(0, 0, 0, 0.9) 0px 4px 15px; }
+        .sub-greeting { font-size: 1.1rem; color: var(--text); margin-bottom: 30px; }
+        .card-icon-kt { width: 48px; height: 65px; border-radius: 6px; background: linear-gradient(135deg, rgb(253, 253, 253), rgb(224, 224, 224)); display: flex; flex-direction: column; align-items: center; justify-content: space-between; color: black; padding: 2px; position: relative; }
+        .card-icon-kf { width: 48px; height: 65px; border-radius: 6px; background: linear-gradient(135deg, rgb(253, 253, 253), rgb(224, 224, 224)); display: grid; grid-template-columns: 1fr 1fr; place-items: center; font-size: 1.1rem; padding: 2px; }
+        .game-select-btn { display: flex; align-items: center; justify-content: flex-start; gap: 20px; width: 90%; max-width: 400px; margin: 15px auto; padding: 20px; font-size: 1.5rem; font-weight: 800; border-radius: var(--radius-lg); background: rgba(33, 38, 45, 0.9); border: 2px solid rgba(255, 255, 255, 0.1); color: white; transition: 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Glowing Animations for Buttons */
+        @keyframes glowPulseGold {
+            0% { box-shadow: 0 0 10px rgba(210, 153, 34, 0.3), 0 6px 0px rgba(210, 153, 34, 0.7); transform: translateY(0); }
+            50% { box-shadow: 0 0 25px rgba(210, 153, 34, 0.8), 0 6px 0px rgba(210, 153, 34, 0.7); transform: translateY(-2px); }
+            100% { box-shadow: 0 0 10px rgba(210, 153, 34, 0.3), 0 6px 0px rgba(210, 153, 34, 0.7); transform: translateY(0); }
+        }
+
+        @keyframes glowPulseBlue {
+            0% { box-shadow: 0 0 10px rgba(31, 111, 235, 0.3), 0 6px 0px rgba(31, 111, 235, 0.7); transform: translateY(0); }
+            50% { box-shadow: 0 0 25px rgba(31, 111, 235, 0.8), 0 6px 0px rgba(31, 111, 235, 0.7); transform: translateY(-2px); }
+            100% { box-shadow: 0 0 10px rgba(31, 111, 235, 0.3), 0 6px 0px rgba(31, 111, 235, 0.7); transform: translateY(0); }
+        }
+
+        .game-select-btn.kf {
+            border-color: rgba(210, 153, 34, 0.8);
+            animation: glowPulseGold 2.5s infinite;
+        }
+
+        .game-select-btn.kt {
+            border-color: rgba(31, 111, 235, 0.8);
+            animation: glowPulseBlue 2.5s infinite;
+            animation-delay: 1.25s; /* Alternate pulses */
+        }
+
+        .game-select-btn:active {
+            animation-play-state: paused;
+            transform: translateY(4px) !important;
+        }
+
+        #main-container { display: none; padding-top: max(85px, env(safe-area-inset-top)); padding-bottom: max(40px, env(safe-area-inset-bottom)); position: relative; z-index: 2; }
+        .cry-overlay { position: fixed; inset: 0px; z-index: 5000; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        .cry-overlay.active { opacity: 1; }
+        .cry-emoji { font-size: 6rem; animation: 0.8s ease-in-out 0s infinite normal none running cryShake; background: rgba(0, 0, 0, 0.6); padding: 15px; border-radius: 50%; box-shadow: rgba(0, 0, 0, 0.8) 0px 0px 50px; backdrop-filter: blur(8px); }
+        .cry-text { font-size: 1.5rem; font-weight: 800; color: white; margin-top: 15px; text-shadow: black 0px 4px 15px; background: rgba(0, 0, 0, 0.6); padding: 5px 15px; border-radius: 20px; }
+        
+        @keyframes cryShake { 
+            0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+            25% { transform: translateY(10px) rotate(-10deg) scale(1.1); }
+            50% { transform: translateY(-10px) rotate(10deg) scale(1); }
+            75% { transform: translateY(10px) rotate(-10deg) scale(1.1); }
+        }
+
+        .stepper { display: flex; align-items: center; gap: 4px; }
+        .stepper button { width: 28px; height: 28px; border-radius: 6px; font-size: 1.2rem; font-weight: 800; color: white; display: flex; align-items: center; justify-content: center; }
+        .stepper .btn-minus { background: var(--red); }
+        .stepper .btn-plus { background: var(--green); }
+        .stepper input { text-align: center; font-weight: 800; font-size: 1.1rem; padding: 0px; height: 28px; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; background: transparent; width: 30px; margin: 0px; color: white; }
+        
+        .multi-stepper { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); padding: 6px; border-radius: var(--radius-md); border: 1px solid rgba(255, 255, 255, 0.1); width: 100%; gap: 6px; }
+        .multi-stepper .btn-group { display: flex; flex: 1 1 0%; gap: 4px; }
+        .multi-stepper .btn-group button { flex: 1 1 0%; padding: 10px 2px; font-weight: 700; border-radius: 6px; color: white; font-size: clamp(0.7rem, 2.5vw, 0.85rem); }
+        .multi-stepper .btn-group.red button { background: var(--red); }
+        .multi-stepper .btn-group.green button { background: var(--green); }
+        .multi-stepper input { flex: 0 0 60px; min-width: 60px; text-align: center; font-size: 1.2rem; font-weight: 800; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; background: transparent; margin: 0px; color: white; }
+        
+        .kf-player-list-wrapper { padding-right: 5px; }
+
+        /* Updated 2-Column Layout for Kachuful Players */
+        #kf-player-rows {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            column-gap: 15px;
+            row-gap: 2px;
+        }
+
+        .kf-player-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .kf-player-row:last-child { border-bottom-width: medium; border-bottom-style: none; border-bottom-color: currentcolor; }
+        .kf-player-name { font-weight: 600; font-size: 0.95rem; width: 45%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .kf-pill-status { width: 85px; padding: 6px 0px; text-align: center; border-radius: var(--radius-pill); font-weight: 700; font-size: 0.8rem; border: 2px solid transparent; }
+        .kf-pill-made { background: var(--green); color: white; }
+        .kf-pill-miss { background: transparent; border-color: var(--red); color: var(--red); }
+        
+        .card-thumbnail-compact { background: rgb(255, 255, 255); border-radius: 8px; width: 55px; height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: rgba(0, 0, 0, 0.6) 0px 4px 15px; border: 2px solid rgb(255, 255, 255); }
+        .card-symbol-compact { font-size: 2.5rem; line-height: 1; }
+        .card-count-huge { font-weight: 800; background: rgba(0, 0, 0, 0.5); color: white; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2); padding: 6px 12px; font-size: 1rem; }
+        
+        @keyframes pulse-count { 
+            0%, 100% { transform: scale(1); box-shadow: rgba(255, 255, 255, 0) 0px 0px 0px; }
+            50% { transform: scale(1.05); box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 15px; }
+        }
+        .pulse-anim { animation: 2.5s ease-in-out 0s infinite normal none running pulse-count; }
+        
+        details.history-accordion { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-md); transition: 0.3s; }
+        details.history-accordion summary { padding: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        details.history-accordion summary::-webkit-details-marker { display: none; }
+        details.history-accordion[open] summary { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .table-wrapper { overflow: auto; padding: 5px; max-height: 40vh; }
+        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.8rem; white-space: nowrap; }
+        th, td { padding: 8px 6px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        th { background: rgba(0, 0, 0, 0.6); color: var(--text-muted); position: sticky; top: 0px; z-index: 10; }
+        .struck td { text-decoration: line-through; opacity: 0.4; }
+        .score-made { color: var(--green); font-weight: 700; }
+        .score-miss { color: var(--red); }
+        
+        .modal { display: flex; position: fixed; inset: 0px; align-items: center; justify-content: center; padding: 15px; z-index: 3000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-bg { position: absolute; inset: 0px; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(6px); }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content { position: relative; margin: auto; background: rgba(22, 27, 34, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-lg); padding: 20px; width: 100%; max-width: 350px; max-height: 85vh; overflow-y: auto; box-shadow: rgba(0, 0, 0, 0.8) 0px 15px 40px; transform: scale(0.8); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 2; }
+        .modal.active .modal-content { transform: scale(1); }
+        
+        /* Updated Snapshot Card for proper Share View */
+        .snapshot-card { position: relative; margin: auto; background: linear-gradient(145deg, rgb(22, 27, 34), rgb(13, 17, 23)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: 15px 12px; text-align: center; box-shadow: rgba(210, 153, 34, 0.3) 0px 10px 40px; overflow: hidden; transform: scale(0.8); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: 100%; max-width: 380px; max-height: 98vh; display: flex; flex-direction: column; z-index: 2; }
+        .modal.active .snapshot-card { transform: scale(1); }
+        .snapshot-card::before { content: "🏆"; position: absolute; font-size: 150px; opacity: 0.05; top: -20px; right: -20px; pointer-events: none; }
+        #endgame-results { overflow: hidden; }
+        .rank-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.4); padding: 6px 10px; border-radius: var(--radius-md); margin-bottom: 4px; border: 1px solid rgba(255, 255, 255, 0.05); position: relative; z-index: 1; }
+        .rank-row.first { background: rgba(210, 153, 34, 0.15); border-color: var(--gold); }
+        .developed-by { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 15px; text-align: center; font-weight: 600; letter-spacing: 1px; }
+        
+        @keyframes fadeIn { 
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0px); }
+        }
+        @keyframes popIn { 
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @media (min-width: 768px) {
+            #main-container { max-width: 1000px; margin: 0px auto; padding-top: 100px; }
+            .desktop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="screen-wipe" class="screen-wipe">
+    <div class="wipe-card" id="wipe-card-symbol" style="color:var(--suit-black);">♠</div>
+</div>
+
+<div id="cry-overlay" class="cry-overlay">
+    <div class="cry-emoji">😭</div>
+    <div id="cry-text" class="cry-text">Player Missed 3 in a Row!</div>
+</div>
+
+<div id="view-splash" style="display: none;">
+    <div class="welcome-content">
+        <div class="greeting" id="splash-greeting">Good Evening</div>
+        <div class="sub-greeting">What would you like to play today?</div>
+        
+        <button class="game-select-btn kf">
+            <div class="card-icon-kf">
+                <span style="color: black; align-self: end; justify-self: end; padding-right:2px;">♠</span>
+                <span style="color: red; align-self: end; justify-self: start; padding-left:2px;">♥</span>
+                <span style="color: red; align-self: start; justify-self: end; padding-right:2px;">♦</span>
+                <span style="color: black; align-self: start; justify-self: start; padding-left:2px;">♣</span>
+            </div>
+            Kachuful
+        </button>
+        
+        <button class="game-select-btn kt">
+            <div class="card-icon-kt">
+                <div style="font-size:0.6rem; position:absolute; top:2px; left:3px; line-height:1; text-align:center; font-weight:800;">3<br>♠</div>
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:space-evenly; height:100%; width:100%;">
+                    <span style="font-size:1rem; line-height:1;">♠</span>
+                    <span style="font-size:1rem; line-height:1;">♠</span>
+                    <span style="font-size:1rem; line-height:1; transform:rotate(180deg);">♠</span>
+                </div>
+                <div style="font-size:0.6rem; position:absolute; bottom:2px; right:3px; line-height:1; text-align:center; font-weight:800; transform:rotate(180deg);">3<br>♠</div>
+            </div>
+            Kali Tiri
+        </button>
+        <div class="developed-by" style="margin-top: 40px;">Crafted by Chirag Patel</div>
+    </div>
+</div>
+
+<div id="main-container" style="display: block;">
+    <header class="app-header">
+        <div class="header-left">
+            <button class="hamburger">☰</button>
+            <div id="header-thumb" class="game-thumb thumb-kf" style="display: flex;">KF</div>
+            <div class="header-titles">
+                <h1 id="top-title">Kachuful Dashboard</h1>
+                <div class="credit">Crafted by Chirag Patel</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button id="header-finish-btn" class="btn-ghost" style="display: block;">Finish Game 🏆</button>
+        </div>
+    </header>
+
+    <div class="menu-overlay" id="menu-overlay"></div>
+    <div class="slide-menu" id="slide-menu">
+        <div class="menu-header">Menu</div>
+        <button id="menu-home-btn">🏠 Home Screen</button>
+        <button>⚙️ Setup Players</button>
+        <button>♠️ Kachuful Game</button>
+        <button>🃏 Kali Tiri Game</button>
+        <button>📖 Game Rules</button>
+        <div style="flex-grow: 1;"></div>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top:10px;">
+            <span class="tiny" style="padding-left: 20px; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Settings</span>
+            <button id="menu-erase-btn" style="color:var(--red);">🗑️ Erase All Data</button>
+        </div>
+        <button style="color:var(--red); border-top: 1px solid rgba(255,255,255,0.1);">⏹️ Quit Current Game</button>
+        <div class="developed-by" style="padding-bottom: 20px;">Crafted by Chirag Patel</div>
+    </div>
+
+    <div class="container" style="padding: 0 10px;">
+        <div id="view-setup" class="view-section">
+            <div class="panel stack" style="max-width: 500px; margin: 0 auto;">
+                <h2 class="text-center" id="setup-title">Player Setup</h2>
+                <p class="tiny text-center">Add players by typing names separated by spaces or commas.</p>
+                <textarea id="setup-input" rows="2" placeholder="e.g. Chirag Foram Ritu Nishit"></textarea>
+                <div id="saved-players-container" style="display:none;">
+                    <span class="tiny">Recent Players (Tap to add):</span>
+                    <div id="saved-players-list" class="pill-container" style="margin-top:5px;"></div>
+                </div>
+                <button class="btn-primary" style="margin-top: 15px;">Next Step</button>
+            </div>
+        </div>
+
+        <div id="view-kachuful" class="view-section active">
+            <div id="kf-placeholder" class="panel text-center stack" style="max-width:500px; margin: 0 auto;">
+                <h3>No Active Game</h3>
+                <p class="tiny">Start a new setup to begin playing Kachuful.</p>
+                <button class="btn-primary">Start Kachuful Setup</button>
+            </div>
+
+            <div id="kf-active-game" style="display: none;" class="desktop-grid">
+                <div class="stack">
+                    <div class="panel flex-between" style="padding: 15px;">
+                        <div class="tiny" id="kf-round-label" style="font-size: 0.65rem; opacity: 0.5; font-weight:800; letter-spacing:1px;">R1</div>
+                        <div id="kf-trump-card" class="card-thumbnail-compact pulse-anim" style="margin: 0 15px;">
+                            <div id="kf-card-symbol" class="card-symbol-compact" style="color: var(--suit-black);">♠</div>
+                        </div>
+                        <div class="stack" style="align-items: flex-end; gap: 5px;">
+                            <div id="kf-card-count" class="card-count-huge">1 Card</div>
+                            <span id="kf-phase-label" class="tiny" style="color: #fff; font-weight: 600;">Agreed Bids</span>
+                        </div>
+                    </div>
+
+                    <div class="panel stack">
+                        <div class="kf-player-list-wrapper">
+                            <div id="kf-player-rows">
+                                <div class="kf-player-row"><div class="kf-player-name">Viral</div><div class="stepper"><button class="btn-minus">−</button><input readonly="" value="1"><button class="btn-plus">+</button></div></div>
+                                <div class="kf-player-row"><div class="kf-player-name">Ritu</div><div class="stepper"><button class="btn-minus">−</button><input readonly="" value="0"><button class="btn-plus">+</button></div></div>
+                                <div class="kf-player-row"><div class="kf-player-name">Foram</div><div class="stepper"><button class="btn-minus">−</button><input readonly="" value="0"><button class="btn-plus">+</button></div></div>
+                                <div class="kf-player-row"><div class="kf-player-name">Disha</div><div class="stepper"><button class="btn-minus">−</button><input readonly="" value="0"><button class="btn-plus">+</button></div></div>
+                                <div class="kf-player-row"><div class="kf-player-name">Dhruvin</div><div class="stepper"><button class="btn-minus">−</button><input readonly="" value="0"><button class="btn-plus">+</button></div></div>
+                                <div class="kf-player-row"><div class="kf-player-name">Zalak</div><div class="stepper"><button class="btn-minus">−</button><input readonly="" value="0"><button class="btn-plus">+</button></div></div>
+                                <div class="kf-player-row"><div class="kf-player-name">Nishit</div><div class="stepper"><button class="btn-minus">−</button><input readonly="" value="0"><button class="btn-plus">+</button></div></div>
+                                <div class="kf-player-row"><div class="kf-player-name">Chirag</div><div class="stepper"><button class="btn-minus">−</button><input readonly="" value="1"><button class="btn-plus">+</button></div></div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                            <div id="kf-warning-msg" style="color: var(--gold); font-size: 0.85rem; font-weight: 800; text-align: center; display: block; margin-bottom: 8px;">⚠️ Chirag CANNOT bid <span style="color:var(--red); font-size:1.1rem;">0</span></div>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn-ghost" style="flex: 0 0 60px; padding: 12px 0;">Reset</button>
+                                <button id="kf-action-btn" class="btn-primary" style="flex:1;">Lock In Bids</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stack">
+                    <div class="panel stack">
+                        <h3 style="font-size: 1rem;">Live Leaderboard</h3>
+                        <div id="kf-leaderboard" class="pill-container"><div class="pill"><span style="color:var(--gold); margin-right:4px;">#1</span> Viral: <strong>0</strong></div><div class="pill"><span style="color:var(--gold); margin-right:4px;">#2</span> Ritu: <strong>0</strong></div><div class="pill"><span style="color:var(--gold); margin-right:4px;">#3</span> Foram: <strong>0</strong></div><div class="pill"><span style="color:var(--gold); margin-right:4px;">#4</span> Disha: <strong>0</strong></div><div class="pill"><span style="color:var(--gold); margin-right:4px;">#5</span> Dhruvin: <strong>0</strong></div><div class="pill"><span style="color:var(--gold); margin-right:4px;">#6</span> Zalak: <strong>0</strong></div><div class="pill"><span style="color:var(--gold); margin-right:4px;">#7</span> Nishit: <strong>0</strong></div><div class="pill"><span style="color:var(--gold); margin-right:4px;">#8</span> Chirag: <strong>0</strong></div></div>
+                    </div>
+                    <div class="panel">
+                        <details class="history-accordion" id="kf-history-accordion">
+                            <summary>Game History Log <span>↓</span></summary>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead id="kf-history-head"><tr><th>R</th><th>Vir</th><th>Rit</th><th>For</th><th>Dis</th><th>Dhr</th><th>Zal</th><th>Nis</th><th>Chi</th><th>Act</th></tr></thead>
+                                    <tbody id="kf-history-body"></tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-kalitiri" class="view-section">
+            <div id="kt-placeholder" class="panel text-center stack" style="max-width:500px; margin: 0 auto;">
+                <h3>No Active Game</h3>
+                <p class="tiny">Start a new setup to begin playing Kali Tiri.</p>
+                <button class="btn-primary">Start Kali Tiri Setup</button>
+            </div>
+
+            <div id="kt-active-game" style="display: none;" class="desktop-grid">
+                <div class="panel stack">
+                    <div class="flex-between">
+                        <h3>Team Selection</h3>
+                        <button class="btn-ghost" style="width: auto; padding: 6px 12px;">Reset</button>
+                    </div>
+                    <span class="tiny">Tap player to assign to Trump Team (Blue)</span>
+                    <div id="kt-team-board" class="pill-container" style="margin-top: 2px;"></div>
+                    
+                    <h3 style="margin-top: 10px;">Agreed Score</h3>
+                    <div class="multi-stepper">
+                        <div class="btn-group red">
+                            <button>-20</button>
+                            <button>-10</button>
+                            <button>-5</button>
+                        </div>
+                        <input type="number" id="kt-score-input" value="250" readonly="">
+                        <div class="btn-group green">
+                            <button>+5</button>
+                            <button>+10</button>
+                            <button>+20</button>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 10px;">Select Winner</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="kt-win-trump" class="btn-ghost" style="flex:1; padding:12px; font-weight:700;">Trump</button>
+                        <button id="kt-win-opp" class="btn-ghost" style="flex:1; padding:12px; font-weight:700;">Opp</button>
+                    </div>
+                    <button id="kt-record-btn" class="btn-green" style="margin-top: 15px;">Record Score</button>
+                </div>
+
+                <div class="stack">
+                    <div class="panel stack">
+                        <h3 style="font-size: 1rem;">Leaderboard &amp; Stats</h3>
+                        <div class="table-wrapper" style="max-height: 25vh;">
+                            <table>
+                                <thead><tr><th>Player</th><th>Score</th><th>Pl</th><th>Win %</th></tr></thead>
+                                <tbody id="kt-leaderboard"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <details class="history-accordion" id="kt-history-accordion">
+                            <summary>Game History Log <span>↓</span></summary>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead id="kt-history-head"></thead>
+                                    <tbody id="kt-history-body"></tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-rules" class="view-section">
+            <div class="desktop-grid">
+                <div class="panel flex-between" style="grid-column: 1 / -1;">
+                    <h2 style="margin:0; font-size:1.2rem;">Rules / નિયમો</h2>
+                    <button class="btn-ghost" style="width:auto;" id="lang-toggle">English</button>
+                </div>
+                <div class="panel stack"><h3 style="color: var(--gold); font-size:1.1rem;" id="rules-kf-title">કચુફુલ (Kachuful)</h3><p id="rules-kf-body" style="font-size: 0.85rem; color: var(--text-muted);">દરેક રાઉન્ડમાં ચોક્કસ ટ્રમ્પ હોય છે. તમારે બરાબર કેટલી થપ્પી જીતશો તે નક્કી કરવાનું રહેશે. ખેલાડીઓની કુલ બિડ રાઉન્ડના કુલ પત્તા જેટલી ન હોવી જોઈએ. સ્કોરિંગ: 0 ની બિડ માટે 10 પોઈન્ટ્સ, અથવા બિડ ગુણ્યા 11. જો તમે તમારી બિડ મુજબ ન જીતો તો 0 સ્કોર મળશે.</p></div>
+                <div class="panel stack"><h3 style="color: var(--blue); font-size:1.1rem;" id="rules-kt-title">કાળી તીરી (Kali Tiri)</h3><p id="rules-kt-body" style="font-size: 0.85rem; color: var(--text-muted);">ટ્રમ્પ ટીમ પસંદ કરો. રમતમાં નક્કી કરેલ સ્કોર ઉમેરો. જો ટ્રમ્પ ટીમ જીતે, તો તેમને નક્કી કરેલ સ્કોર મળશે. જો વિરોધી ટીમ જીતે, તો તેમને બમણો સ્કોર મળશે.</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-max-cards" class="modal">
+    <div class="modal-bg"></div>
+    <div class="modal-content stack">
+        <h2 class="text-center" style="font-size: 1.1rem; color: var(--gold);">Kachuful Settings</h2>
+        <div class="flex-between" style="background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.1); margin-top:5px;">
+            <span class="tiny" style="font-size:0.8rem; font-weight:600; color:white;">Max Cards</span>
+            <div class="stepper"><button class="btn-minus">−</button><input type="number" id="setup-maxcards" value="5" min="1" max="13" readonly=""><button class="btn-plus">+</button></div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn-ghost" style="flex:1;">Cancel</button><button class="btn-primary" style="flex:1;">Start Game</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-alert" class="modal"><div class="modal-bg"></div><div class="modal-content stack text-center"><h3 id="alert-title" style="color: var(--gold);">Notice</h3><p id="alert-msg" style="font-size: 0.9rem; margin: 10px 0;"></p><button id="alert-btn" class="btn-primary">OK</button></div></div>
+<div id="modal-confirm" class="modal"><div class="modal-bg"></div><div class="modal-content stack text-center"><h3 id="confirm-title" style="color: var(--red);">Confirm</h3><p id="confirm-msg" style="font-size: 0.9rem; margin: 10px 0;"></p><div style="display: flex; gap: 10px;"><button id="confirm-no" class="btn-ghost" style="flex:1;">Cancel</button><button id="confirm-yes" class="btn-danger" style="flex:1;">Yes</button></div></div></div>
+<div id="modal-prompt" class="modal"><div class="modal-bg"></div><div class="modal-content stack text-center"><h3 id="prompt-title" style="color: var(--red);">Action Required</h3><p id="prompt-msg" style="font-size: 0.9rem; margin: 5px 0;"></p><input type="number" id="prompt-input" placeholder="..." style="text-align:center;"><div style="display: flex; gap: 10px; margin-top:10px;"><button id="prompt-no" class="btn-ghost" style="flex:1;">Cancel</button><button id="prompt-yes" class="btn-danger" style="flex:1;">Submit</button></div></div></div>
+<div id="edit-modal" class="modal"><div class="modal-bg"></div><div class="modal-content stack"><h2 id="edit-modal-title" style="font-size: 1.1rem;">Edit Game Record</h2><div id="edit-modal-body" class="stack" style="margin: 5px 0;"></div><div style="display: flex; gap: 10px; margin-top: 10px;"><button class="btn-ghost" style="flex:1;">Cancel</button><button class="btn-primary" style="flex:1;">Save</button></div></div></div>
+
+<div id="modal-share" class="modal">
+    <div class="modal-bg"></div>
+    <div class="snapshot-card stack" id="shareable-content">
+        <div class="developed-by" style="margin-top:0; margin-bottom:0; font-size:0.7rem;">Crafted by Chirag Patel</div>
+        <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:5px;">
+            <div id="endgame-logo" class="game-thumb" style="display:flex; position:static;"></div>
+            <h2 id="endgame-title" style="margin:0; font-size:1.6rem; color:var(--gold); font-weight:800; letter-spacing:1px; line-height:1;"></h2>
+        </div>
+        <h3 style="margin-bottom: 5px; color: #fff;">🏆 Final Standings 🏆</h3>
+        <div id="endgame-results" class="stack" style="gap: 6px;"></div>
+        
+        <!-- Updated Bottom Action Section -->
+        <p class="tiny text-center" id="share-instruction" style="margin-top:10px; margin-bottom:5px; font-weight: 600; color: var(--green);">Ready to share!</p>
+        <div id="endgame-action-buttons" style="display:flex; flex-direction:column; gap:8px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+            <button id="btn-share-thumbnail" class="btn-primary" style="padding:10px; background-color: #25D366; border: none;">Share Results 📲</button>
+            <button class="btn-green" style="padding:10px;">Play Again (Same Players)</button>
+            <button class="btn-primary" style="padding:10px;">Play Again (Edit Players)</button>
+            <button class="btn-ghost" style="padding:10px;">Home Screen</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // 1. Home Screen Navigation Logic
+    const homeBtn = document.getElementById('menu-home-btn');
+    if (homeBtn) {
+        homeBtn.addEventListener('click', () => {
+            // Hide all active game/setup views and main container
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('main-container').style.display = 'none';
+            
+            // Show Splash Screen
+            document.getElementById('view-splash').style.display = 'flex';
+            
+            // Close the side menu
+            document.getElementById('slide-menu').classList.remove('open');
+            document.getElementById('menu-overlay').classList.remove('open');
+        });
+    }
+
+    // 2. Share Thumbnail Logic (Without buttons in screenshot)
+    const shareBtn = document.getElementById('btn-share-thumbnail');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const snapshotCard = document.getElementById('shareable-content');
+            const actionButtons = document.getElementById('endgame-action-buttons');
+            const instructionText = document.getElementById('share-instruction');
+
+            // Temporarily hide UI elements you don't want captured
+            actionButtons.style.display = 'none';
+            instructionText.style.display = 'none';
+
+            try {
+                // Capture image using html2canvas
+                const canvas = await html2canvas(snapshotCard, {
+                    backgroundColor: '#0d1117',
+                    scale: 2 // High resolution
+                });
+                
+                // Convert and initiate Native Share
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'Game-Leaderboard.png', { type: 'image/png' });
+                    
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: 'Game Standings',
+                            text: 'Check out the final results!',
+                            files: [file]
+                        });
+                    } else {
+                        alert('Native sharing is not supported on this browser. Long press the modal to manually save.');
+                    }
+                });
+            } catch (error) {
+                console.error("Error generating shareable image:", error);
+            } finally {
+                // Restore UI buttons immediately
+                actionButtons.style.display = 'flex';
+                instructionText.style.display = 'block';
+            }
+        });
+    }
+
+    // Settings Menu Event Handling
+    const eraseBtn = document.getElementById('menu-erase-btn');
+    if (eraseBtn) {
+        eraseBtn.addEventListener('click', () => {
+            const pin = prompt("Enter administrative PIN to delete records:");
+            if (pin === "1111") {
+                // Proceed with local storage wipe / clear arrays here
+                alert("Data erased successfully.");
+            } else if (pin !== null) {
+                alert("Incorrect PIN. Access denied.");
+            }
+        });
+    }
+});
+</script>
+
+</body>
+</html>
         .panel { 
             background: rgba(22, 27, 34, 0.25); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--radius-lg); 
