@@ -708,11 +708,31 @@
             if (active) {
                 if(active === 'kachuful') {
                     const sd = JSON.parse(localStorage.getItem('saved_kf'));
-                    if(sd) { document.getElementById('view-splash').style.display = 'none'; document.getElementById('card-rain').style.display = 'none'; document.getElementById('main-container').style.display = 'block'; KF.state = sd; APP.currentModule = 'kachuful'; KF.render(); APP.switchTab('kachuful'); } 
+                    if(sd) { 
+                        document.getElementById('view-splash').style.display = 'none'; 
+                        document.getElementById('card-rain').style.display = 'none'; 
+                        document.getElementById('main-container').style.display = 'block'; 
+                        
+                        // FIX: Unhide the active game grid
+                        document.getElementById('kf-placeholder').style.display = 'none'; 
+                        document.getElementById('kf-active-game').style.display = window.innerWidth >= 768 ? 'grid' : 'block';
+
+                        KF.state = sd; APP.currentModule = 'kachuful'; KF.render(); APP.switchTab('kachuful'); 
+                    } 
                     else { localStorage.removeItem('active_game'); }
                 } else if(active === 'kalitiri') {
                     const sd = JSON.parse(localStorage.getItem('saved_kt'));
-                    if(sd) { document.getElementById('view-splash').style.display = 'none'; document.getElementById('card-rain').style.display = 'none'; document.getElementById('main-container').style.display = 'block'; KT.state = sd; APP.currentModule = 'kalitiri'; KT.render(); APP.switchTab('kalitiri'); } 
+                    if(sd) { 
+                        document.getElementById('view-splash').style.display = 'none'; 
+                        document.getElementById('card-rain').style.display = 'none'; 
+                        document.getElementById('main-container').style.display = 'block'; 
+                        
+                        // FIX: Unhide the active game grid
+                        document.getElementById('kt-placeholder').style.display = 'none'; 
+                        document.getElementById('kt-active-game').style.display = window.innerWidth >= 768 ? 'grid' : 'block';
+
+                        KT.state = sd; APP.currentModule = 'kalitiri'; KT.render(); APP.switchTab('kalitiri'); 
+                    } 
                     else { localStorage.removeItem('active_game'); }
                 }
             }
@@ -1023,7 +1043,13 @@
             document.getElementById('kf-placeholder').style.display = 'none'; document.getElementById('kf-active-game').style.display = window.innerWidth >= 768 ? 'grid' : 'block';
             UI.updateHeader('kachuful'); KF.initRound();
         },
-        calcCards: (r) => r <= KF.state.max ? r : KF.state.max - (r - KF.state.max),
+        calcCards: (r) => {
+            const max = parseInt(KF.state.max) || 5;
+            if (max <= 1) return 1;
+            const cycle = (max - 1) * 2;
+            const pos = (r - 1) % cycle;
+            return pos < max ? pos + 1 : cycle - pos + 1;
+        },
         initRound: () => { KF.state.phase = 'bid'; KF.state.bids = new Array(KF.state.players.length).fill(0); KF.state.misses = new Array(KF.state.players.length).fill(false); KF.render(); },
         adjBid: (i, d) => { if(KF.state.phase !== 'bid') return; KF.state.bids[i] = Math.max(0, Math.min(KF.calcCards(KF.state.round), KF.state.bids[i] + d)); KF.render(); },
         togMiss: (i) => { if(KF.state.phase === 'score') { KF.state.misses[i] = !KF.state.misses[i]; KF.render(); } },
