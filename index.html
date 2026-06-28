@@ -12,6 +12,7 @@
             --text: #c9d1d9; --text-muted: #8b949e; --green: #238636; --red: #da3633;
             --blue: #1f6feb; --gold: #d29922; --suit-black: #000000; --suit-red: #d73a49;
             --radius-md: 8px; --radius-lg: 12px; --radius-pill: 50px;
+            --p-count: 10; /* Dynamic Variable for resizing */
             font-family: 'Work Sans', sans-serif;
         }
 
@@ -20,6 +21,12 @@
         body {
             background-color: var(--bg-color); color: var(--text); line-height: 1.5;
             -webkit-tap-highlight-color: transparent; overflow-x: hidden; min-height: 100vh;
+            overscroll-behavior-y: contain; /* Enable native stretch/bounce overscroll */
+        }
+
+        .table-wrapper, #main-container, .modal-content, .slide-menu {
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: auto;
         }
 
         button { font-family: inherit; border: none; background: none; cursor: pointer; color: inherit; transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -43,6 +50,7 @@
         
         .stack { display: flex; flex-direction: column; gap: 15px; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .flex-row { display: flex; flex-direction: row; gap: 15px; }
         
         .btn-primary { background: var(--blue); color: white; padding: 14px 20px; border-radius: var(--radius-md); font-weight: 700; width: 100%; font-size: 1rem; }
         .btn-green { background: var(--green); color: white; padding: 14px 20px; border-radius: var(--radius-md); font-weight: 700; width: 100%; font-size: 1rem; }
@@ -187,44 +195,46 @@
         }
 
         /* --- DYNAMIC KACHUFUL COMPRESSION CSS --- */
-        #kf-active-game .panel { padding: clamp(4px, 1vh, 8px); margin-bottom: clamp(2px, 0.5vh, 8px); gap: clamp(2px, 0.5vh, 6px); }
-        #kf-header-panel { padding: clamp(4px, 1vh, 10px) !important; margin-bottom: clamp(2px, 0.5vh, 5px) !important; }
+        #kf-active-game .panel { padding: clamp(10px, 2vh, 15px); }
         
         #kf-player-rows { display: flex; flex-direction: column; gap: 0; }
         
         .kf-player-row { 
             display: flex; align-items: center; 
-            padding: clamp(1px, 0.2vh, 4px) 0; 
+            padding: clamp(2px, 0.5vh, 6px) 0; 
             border-bottom: 1px solid rgba(255,255,255,0.05); 
-            height: clamp(22px, calc(45vh / 12), 34px);
+            height: clamp(40px, calc((100vh - 280px) / var(--p-count)), 65px);
+            transition: all 0.2s ease;
         }
         .kf-player-row:last-child { border-bottom: none; }
         
         .kf-player-name { 
-            font-weight: 600; font-size: clamp(0.8rem, 1.8vh, 1rem); 
+            font-weight: 600; 
+            font-size: clamp(1rem, calc((100vh - 280px) / var(--p-count) * 0.35), 1.3rem); 
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
         }
 
-        /* Reduced Stepper & Input Size (-20%) */
-        .stepper { display: flex; align-items: center; gap: 4px; margin-left: 0; }
-        .stepper button { width: clamp(19px, 3.2vh, 25px); height: clamp(19px, 3.2vh, 25px); border-radius: 4px; font-size: clamp(0.8rem, 1.6vh, 0.95rem); font-weight: 800; color: white; display: flex; align-items: center; justify-content: center; }
+        /* Increased Stepper & Input Size */
+        .stepper { display: flex; align-items: center; gap: 6px; margin-left: 0; }
+        .stepper button { width: clamp(28px, 4vh, 36px); height: clamp(28px, 4vh, 36px); border-radius: 6px; font-size: clamp(1.1rem, 2vh, 1.4rem); font-weight: 800; color: white; display: flex; align-items: center; justify-content: center; }
         .stepper .btn-minus { background: var(--red); }
         .stepper .btn-plus { background: var(--green); }
-        .stepper input { text-align: center; font-weight: 800; font-size: clamp(0.7rem, 1.6vh, 0.9rem); padding: 0; height: clamp(19px, 3.2vh, 25px); border: none; background: transparent; width: clamp(21px, 3.2vh, 27px); margin: 0; color: white;}
+        .stepper input { text-align: center; font-weight: 800; font-size: clamp(1rem, 2vh, 1.2rem); padding: 0; height: clamp(28px, 4vh, 36px); border: none; background: transparent; width: clamp(30px, 4vh, 40px); margin: 0; color: white;}
         
-        /* Reduced Pill Size (-20%) & Dimmer Colors */
-        .kf-pill-status { margin-left: 0; width: clamp(60px, 14.4vw, 68px); padding: clamp(3px, 0.8vh, 5px) 0; text-align: center; border-radius: var(--radius-md); font-weight: 700; font-size: clamp(0.6rem, 1.2vh, 0.68rem); border: 2px solid transparent; }
+        /* Pill Size Alignment */
+        .kf-pill-status { margin-left: 0; width: clamp(75px, 16vw, 90px); padding: clamp(6px, 1.2vh, 10px) 0; text-align: center; border-radius: var(--radius-md); font-weight: 700; font-size: clamp(0.8rem, 1.5vh, 0.95rem); border: 2px solid transparent; }
         .kf-pill-made { background: #1a6327; color: #d0ebd5; border: 1px solid #238636; }
         .kf-pill-miss { background: rgba(218, 54, 51, 0.1); border-color: #a32a28; color: #e89594; }
 
-        /* Dynamic Header Adjustments */
-        .card-thumbnail-compact { background: #ffffff; border-radius: 8px; width: clamp(30px, 6vw, 45px); height: clamp(40px, 8vh, 60px); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.6); border: 2px solid #fff; }
-        .card-symbol-compact { font-size: clamp(1.4rem, 3.5vh, 2rem); line-height: 1; }
-        .card-count-huge { font-weight: 800; background: rgba(0,0,0,0.5); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); padding: clamp(2px, 0.5vh, 4px) clamp(6px, 1.5vw, 10px); font-size: clamp(0.75rem, 1.8vh, 0.95rem);}
-        #kf-round-label { font-size: clamp(0.6rem, 1.5vh, 0.75rem); }
+        /* Dynamic Header Right-Side Adjustments */
+        .card-thumbnail-large { background: #ffffff; border-radius: 10px; width: clamp(55px, 14vw, 75px); height: clamp(75px, 19vw, 105px); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.6); border: 2px solid #fff; }
+        .card-symbol-large { font-size: clamp(2.5rem, 7vw, 4rem); line-height: 1; }
+        .card-count-text { font-weight: 800; color: white; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 8px; font-size: clamp(0.85rem, 1.8vh, 1rem); text-align: center; width: 100%;}
+        .round-text { font-size: clamp(0.7rem, 1.5vh, 0.85rem); color: var(--text-muted); font-weight: 800; text-align: center; }
+        .phase-text { font-size: clamp(0.65rem, 1.2vh, 0.75rem); line-height: 1.2; text-align: center; }
         
-        /* Reduced Action Button Size */
-        #kf-action-btn, #kf-active-game .btn-ghost { padding: clamp(6px, 1.2vh, 10px) 0; font-size: clamp(0.8rem, 1.5vh, 0.9rem); }
+        /* Action Button Size */
+        #kf-action-btn, #kf-active-game .btn-ghost { padding: clamp(8px, 1.5vh, 12px) 0; font-size: clamp(0.9rem, 1.8vh, 1rem); }
 
         .multi-stepper { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 6px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.1); width: 100%; gap: 6px; }
         .multi-stepper .btn-group { display: flex; flex: 1; gap: 4px; }
@@ -377,27 +387,27 @@
 
             <div id="kf-active-game" style="display: none;" class="desktop-grid">
                 <div class="stack">
-                    <div class="panel flex-between" id="kf-header-panel">
-                        <div class="tiny" id="kf-round-label" style="font-size: 0.65rem; opacity: 0.5; font-weight:800; letter-spacing:1px;">R1</div>
-                        <div id="kf-trump-card" class="card-thumbnail-compact pulse-anim" style="margin: 0 15px;">
-                            <div id="kf-card-symbol" class="card-symbol-compact" style="color: var(--suit-black);">♠</div>
-                        </div>
-                        <div class="stack" style="align-items: flex-end; gap: 5px;">
-                            <div id="kf-card-count" class="card-count-huge">5 Cards</div>
-                            <span id="kf-phase-label" class="tiny" style="color: #fff; font-weight: 600;">Agreed Bids Phase</span>
-                        </div>
-                    </div>
-
-                    <div class="panel stack">
-                        <div class="kf-player-list-wrapper">
-                            <div id="kf-player-rows"></div>
-                        </div>
-                        <div style="margin-top: 2px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">
-                            <div id="kf-warning-msg" style="color: var(--gold); font-size: 0.85rem; font-weight: 800; text-align: center; display: none; margin-bottom: 4px;"></div>
-                            <div style="display:flex; gap:10px;">
-                                <button class="btn-ghost" style="flex: 0 0 60px;" onclick="KF.resetRound()">Reset</button>
-                                <button id="kf-action-btn" class="btn-primary" style="flex:1;" onclick="KF.handleAction()">Lock In Bids</button>
+                    <div class="panel flex-row">
+                        <div style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
+                            <div class="kf-player-list-wrapper">
+                                <div id="kf-player-rows"></div>
                             </div>
+                            <div style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                                <div id="kf-warning-msg" style="color: var(--gold); font-size: 0.85rem; font-weight: 800; text-align: center; display: none; margin-bottom: 4px;"></div>
+                                <div style="display:flex; gap:10px;">
+                                    <button class="btn-ghost" style="flex: 0 0 60px;" onclick="KF.resetRound()">Reset</button>
+                                    <button id="kf-action-btn" class="btn-primary" style="flex:1;" onclick="KF.handleAction()">Lock In Bids</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="width: clamp(75px, 20vw, 95px); display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px; gap: 8px;">
+                            <div id="kf-trump-card" class="card-thumbnail-large pulse-anim">
+                                <div id="kf-card-symbol" class="card-symbol-large" style="color: var(--suit-black);">♠</div>
+                            </div>
+                            <div id="kf-card-count" class="card-count-text">5 Cards</div>
+                            <div id="kf-round-label" class="round-text">R1</div>
+                            <div id="kf-phase-label" class="phase-text" style="color: #fff; font-weight: 600;">Agreed Bids</div>
                         </div>
                     </div>
                 </div>
@@ -713,7 +723,6 @@
                         document.getElementById('card-rain').style.display = 'none'; 
                         document.getElementById('main-container').style.display = 'block'; 
                         
-                        // FIX: Unhide the active game grid
                         document.getElementById('kf-placeholder').style.display = 'none'; 
                         document.getElementById('kf-active-game').style.display = window.innerWidth >= 768 ? 'grid' : 'block';
 
@@ -727,7 +736,6 @@
                         document.getElementById('card-rain').style.display = 'none'; 
                         document.getElementById('main-container').style.display = 'block'; 
                         
-                        // FIX: Unhide the active game grid
                         document.getElementById('kt-placeholder').style.display = 'none'; 
                         document.getElementById('kt-active-game').style.display = window.innerWidth >= 768 ? 'grid' : 'block';
 
@@ -1086,8 +1094,14 @@
         },
         render: () => {
             const cards = KF.calcCards(KF.state.round); const trump = KF.state.suits[(KF.state.round - 1) % 4];
-            document.getElementById('kf-round-label').innerText = `R${KF.state.round}`; document.getElementById('kf-card-symbol').innerText = trump.s; document.getElementById('kf-card-symbol').style.color = trump.c;
-            document.getElementById('kf-card-count').innerText = `${cards} Card${cards>1?'s':''}`; document.getElementById('kf-phase-label').innerText = KF.state.phase === 'bid' ? 'Agreed Bids' : 'Tap misses';
+            
+            // Adjust mathematical sizing basis for row heights dynamically
+            document.documentElement.style.setProperty('--p-count', Math.max(5, KF.state.players.length));
+
+            document.getElementById('kf-round-label').innerText = `Round ${KF.state.round}`; 
+            document.getElementById('kf-card-symbol').innerText = trump.s; document.getElementById('kf-card-symbol').style.color = trump.c;
+            document.getElementById('kf-card-count').innerText = `${cards} Card${cards>1?'s':''}`; 
+            document.getElementById('kf-phase-label').innerText = KF.state.phase === 'bid' ? 'Agreed Bids' : 'Tap misses';
 
             const pRows = document.getElementById('kf-player-rows'); pRows.innerHTML = '';
             let currTot = KF.state.bids.slice(0, -1).reduce((a,b)=>a+b, 0); let restricted = cards - currTot; let lastIdx = KF.state.players.length - 1; 
